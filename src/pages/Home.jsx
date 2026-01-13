@@ -30,7 +30,7 @@ export default function Home() {
             <QuickActionButton icon="💬" label="NHC AI Chat" color="#22c55e" />
             <QuickActionButton icon="📊" label="Notices" color="#3B82F6" />
             <QuickActionButton icon="📅" label="Up-coming events" color="#F59E0B" />
-            <QuickActionButton icon="💰" label="Today's Highlights" color="#EF4444" />
+            <QuickActionButton icon="💰" label="Pay your monthly dues" color="#EF4444" />
           </div>
         </section>
 
