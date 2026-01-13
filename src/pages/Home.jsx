@@ -45,9 +45,9 @@ const Home = () => {
           {[
             { label: 'Support', color: '#E0E7FF', textColor: '#4F46E5', route: '/chat', icon: '💬' },
             { label: 'Vacant Houses', color: '#CFFAFE', textColor: '#0891B2', route: '/vacant-houses', icon: '🏠' },
-            { label: 'Bills', color: '#D1FAE5', textColor: '#059669', route: '/bills', icon: '💰' },
+            { label: 'Notices', color: '#D1FAE5', textColor: '#059669', route: '/notices', icon: '📋' },
             { label: 'Pay your dues', color: '#DBEAFE', textColor: '#2563EB', route: '/bills', icon: '💳' },
-            { label: 'You opinion', color: '#FEE2E2', textColor: '#DC2626', route: '/complaints', icon: '📋' },
+            { label: 'Share Opinion', color: '#FEE2E2', textColor: '#DC2626', route: '/share-opinion', icon: '🗣️' },
             { label: 'Updates', color: '#EDE9FE', textColor: '#7C3AED', route: '/announcements', icon: '📢' },
           ].map((action) => (
             <button

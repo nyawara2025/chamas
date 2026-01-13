@@ -7,8 +7,8 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Chat from './pages/Chat'
 import VacantHouses from './pages/VacantHouses'
-import Bills from './pages/Bills'
-import Complaints from './pages/Complaints'
+import Notices from './pages/Notices'
+import ShareOpinion from './pages/ShareOpinion'
 import Announcements from './pages/Announcements'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
@@ -32,14 +32,14 @@ function App() {
             <VacantHouses />
           </ProtectedRoute>
         } />
-        <Route path="/bills" element={
+        <Route path="/notices" element={
           <ProtectedRoute>
-            <Bills />
+            <Notices />
           </ProtectedRoute>
         } />
-        <Route path="/complaints" element={
+        <Route path="/share-opinion" element={
           <ProtectedRoute>
-            <Complaints />
+            <ShareOpinion />
           </ProtectedRoute>
         } />
         <Route path="/announcements" element={

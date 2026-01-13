@@ -34,6 +34,10 @@ export const API_ENDPOINTS = {
 
   // Chat Operations
   sendChatMessage: `${getBaseUrl()}/nhc-chat`,
+
+  // Opinion/Feedback Operations
+  submitOpinion: `${getBaseUrl()}/nhc-submit-opinion`,
+  getNotices: `${getBaseUrl()}/nhc-notices`,
 };
 
 // Webhook paths (for reference)
