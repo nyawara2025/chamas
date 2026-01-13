@@ -1,63 +1,49 @@
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getStoredUser, clearAuthData } from '../utils/apiClient'
 
-export default function Header({ title, showBack = true }) {
+const Header = () => {
   const navigate = useNavigate()
-  const handleBack = () => navigate(-1)
+  const user = getStoredUser()
+
+  const handleLogout = () => {
+    clearAuthData()
+    navigate('/login')
+  }
 
   return (
-    <header className="app-header">
-      <div className="header-content">
-        <div className="header-left">
-          {showBack && (
-            <button className="back-btn" onClick={handleBack}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-            </button>
-          )}
-        </div>
-        <h1 className="header-title">{title}</h1>
-        <div className="header-right" />
+    <header style={{
+      background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
+      color: 'white',
+      padding: '16px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    }}>
+      <div>
+        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+          NHC Langata
+        </h1>
+        <p style={{ margin: '4px 0 0', fontSize: '0.75rem', opacity: 0.9 }}>
+          Residential Portal
+        </p>
       </div>
-      <style>{`
-        .app-header {
-          position: sticky;
-          top: 0;
-          z-index: 100;
-          background: #ffffff;
-          border-bottom: 1px solid #f1f5f9;
-          padding: 0 16px;
-          padding-top: env(safe-area-inset-top);
-        }
-        .header-content {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          max-width: 600px;
-          margin: 0 auto;
-          height: 60px;
-        }
-        .header-left { display: flex; align-items: center; gap: 8px; min-width: 48px; }
-        .header-right { display: flex; align-items: center; justify-content: flex-end; min-width: 48px; }
-        .back-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          background: transparent;
-          border: none;
-          border-radius: 10px;
-          color: #1e293b;
-          cursor: pointer;
-        }
-        .back-btn:hover { background: #f1f5f9; color: #22c55e; }
-        .header-title { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; text-align: center; flex: 1; }
-        body.dark-mode .app-header { background: #1e293b; border-bottom-color: #334155; }
-        body.dark-mode .back-btn { color: #f1f5f9; }
-        body.dark-mode .back-btn:hover { background: #334155; color: #22c55e; }
-        body.dark-mode .header-title { color: #f1f5f9; }
-      `}</style>
+      <button
+        onClick={handleLogout}
+        style={{
+          padding: '8px 16px',
+          background: 'rgba(255,255,255,0.2)',
+          border: 'none',
+          borderRadius: '8px',
+          color: 'white',
+          cursor: 'pointer',
+          fontSize: '0.875rem'
+        }}
+      >
+        Logout
+      </button>
     </header>
   )
 }
+
+export default Header

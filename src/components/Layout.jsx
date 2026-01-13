@@ -1,19 +1,18 @@
-import BottomNav from './BottomNav'
+import React from 'react'
+import { Outlet } from 'react-router-dom'
+import Header from '../components/Header'
+import BottomNav from '../components/BottomNav'
 
-export default function Layout({ children, title, showBack = true }) {
+const Layout = () => {
   return (
-    <>
-      <main className="main-content">
-        {children}
+    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      <Header />
+      <main style={{ paddingBottom: '80px' }}>
+        <Outlet />
       </main>
       <BottomNav />
-      <style>{`
-        .main-content {
-          flex: 1;
-          padding-bottom: 80px;
-          padding-top: env(safe-area-inset-top);
-        }
-      `}</style>
-    </>
+    </div>
   )
 }
+
+export default Layout

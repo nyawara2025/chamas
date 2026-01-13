@@ -1,0 +1,108 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getStoredUser } from '../utils/apiClient'
+
+const Profile = () => {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const storedUser = getStoredUser()
+    if (storedUser) {
+      setUser(storedUser)
+    }
+  }, [])
+
+  return (
+    <div style={{ padding: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <button 
+          onClick={() => navigate(-1)}
+          style={{
+            padding: '8px 16px',
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          ← Back
+        </button>
+        <h1 style={{ margin: 0, fontSize: '1.25rem', color: '#1e293b' }}>My Profile</h1>
+      </div>
+
+      {user ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Profile Card */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: '2rem',
+              color: 'white',
+              fontWeight: 600
+            }}>
+              {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
+            </div>
+            <h2 style={{ margin: '0 0 4px', color: '#1e293b' }}>
+              {user.first_name} {user.last_name}
+            </h2>
+            <p style={{ margin: 0, color: '#64748b' }}>{user.email}</p>
+          </div>
+
+          {/* Residence Info */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '20px'
+          }}>
+            <h3 style={{ margin: '0 0 16px', color: '#1e293b', fontSize: '1rem' }}>
+              Residence Information
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>House Number</span>
+                <span style={{ fontWeight: 500, color: '#1e293b' }}>{user.house_number}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Block</span>
+                <span style={{ fontWeight: 500, color: '#1e293b' }}>{user.block_name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Phase</span>
+                <span style={{ fontWeight: 500, color: '#1e293b' }}>{user.phase_name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Phone</span>
+                <span style={{ fontWeight: 500, color: '#1e293b' }}>{user.phone}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          textAlign: 'center',
+          color: '#64748b'
+        }}>
+          <p>Loading profile...</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default Profile
