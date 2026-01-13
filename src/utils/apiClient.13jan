@@ -16,7 +16,7 @@ export const STORAGE_KEYS = {
  * @param {object} options - Fetch options (method, headers, body, etc.)
  * @returns {Promise<object>} - Parsed JSON response
  */
-const apiRequest = async (url, options = {}) => {
+export const apiRequest = async (url, options = {}) => {
   const defaultHeaders = {
     'Content-Type': 'application/json',
   };
@@ -81,13 +81,16 @@ const apiRequest = async (url, options = {}) => {
 /**
  * Login resident user via n8n webhook
  * @param {string} email - Resident email
- * @param {string} password - Resident password (house number)
+ * @param {string} apartmentId - Resident apartment ID
  * @returns {Promise<object>} - User data and auth token
  */
-export const loginResident = async (email, password) => {
+export const loginResident = async (email, apartmentId) => {
   const response = await apiRequest(API_ENDPOINTS.residentLogin, {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ 
+      email, 
+      apartment_id: apartmentId 
+    }),
   });
 
   // Validate response structure
@@ -102,7 +105,9 @@ export const loginResident = async (email, password) => {
     last_name: response.last_name,
     email: response.email,
     phone: response.phone,
-    house_number: response.house_number,
+    apartment_id: response.apartment_id,
+    // Apartment details from joined query
+    apartment_number: response.apartment_number,
     block_name: response.block_name,
     phase_name: response.phase_name,
   };
@@ -137,8 +142,58 @@ export const getVacantHouses = async () => {
 };
 
 /**
+ * Get payment history and balance for a resident
+ * @param {number} residentId - The resident's ID
+ * @returns {Promise<object>} - Object with payment history and balance summary
+ */
+export const getPaymentHistory = async (residentId) => {
+  const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
+    method: 'POST',
+    body: JSON.stringify({ resident_id: residentId }),
+  });
+
+  // Validate response structure
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  return {
+    resident_id: response.resident_id,
+    resident_name: response.resident_name,
+    house_number: response.house_number,
+    phase: response.phase,
+    monthly_rate: response.monthly_rate || 200,
+    months_count: response.months_count || 0,
+    total_dues: response.total_dues || 0,
+    total_paid: response.total_paid || 0,
+    outstanding_balance: response.outstanding_balance || 0,
+    payment_history: response.payment_history || [],
+  };
+};
+
+/**
+ * Record a new payment for a resident
+ * @param {number} residentId - The resident's ID
+ * @param {number} amount - Payment amount (Kshs)
+ * @param {string} transactionCode - M-Pesa transaction code
+ * @returns {Promise<object>} - Response with success status and message
+ */
+export const recordPayment = async (residentId, amount, transactionCode) => {
+  const response = await apiRequest(API_ENDPOINTS.recordPayment, {
+    method: 'POST',
+    body: JSON.stringify({
+      resident_id: residentId,
+      amount: amount,
+      transaction_code: transactionCode,
+    }),
+  });
+
+  return response;
+};
+
+/**
  * Get the stored resident ID
- * @returns {string|null} - Resident UUID or null
+ * @returns {string|null} - Resident ID or null
  */
 export const getStoredResidentId = () => {
   return localStorage.getItem(STORAGE_KEYS.RESIDENT_ID);
@@ -173,6 +228,8 @@ export default {
   apiRequest,
   loginResident,
   getVacantHouses,
+  getPaymentHistory,
+  recordPayment,
   getStoredResidentId,
   getStoredUser,
   clearAuthData,

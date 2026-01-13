@@ -25,12 +25,18 @@ export const API_ENDPOINTS = {
   getComplaints: `${getBaseUrl()}/nhc-complaints`,
   
   // Payment Operations  
-  getBills: `${getBaseUrl()}/nhc-bills`,
-  processPayment: `${getBaseUrl()}/nhc-process-payment`,
   getPaymentHistory: `${getBaseUrl()}/nhc-payment-history`,
+  recordPayment: `${getBaseUrl()}/nhc-record-payment`,
   
   // Announcement Operations
   getAnnouncements: `${getBaseUrl()}/nhc-announcements`,
+
+  // Chat Operations
+  sendChatMessage: `${getBaseUrl()}/nhc-chat`,
+
+  // Opinion/Feedback Operations
+  submitOpinion: `${getBaseUrl()}/nhc-submit-opinion`,
+  getNotices: `${getBaseUrl()}/nhc-notices`,
 };
 
 // Webhook paths (for reference)
@@ -41,9 +47,8 @@ export const WEBHOOK_PATHS = {
   getVacantHouses: 'nhc-vacant-houses',
   submitComplaint: 'nhc-submit-complaint',
   getComplaints: 'nhc-complaints',
-  getBills: 'nhc-bills',
-  processPayment: 'nhc-process-payment',
   getPaymentHistory: 'nhc-payment-history',
+  recordPayment: 'nhc-record-payment',
   getAnnouncements: 'nhc-announcements',
 };
 

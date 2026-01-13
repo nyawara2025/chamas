@@ -1,0 +1,598 @@
+import React, { useState, useEffect } from 'react';
+import { getPaymentHistory, recordPayment, getStoredUser } from '../utils/apiClient';
+
+const Bills = () => {
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [financials, setFinancials] = useState({
+    resident_name: '',
+    house_number: '',
+    phase: '',
+    monthly_rate: 200,
+    months_count: 0,
+    total_dues: 0,
+    total_paid: 0,
+    outstanding_balance: 0,
+    payment_history: [],
+  });
+  const [formData, setFormData] = useState({
+    amount: 200,
+    transactionCode: '',
+  });
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const user = getStoredUser();
+  const residentId = user?.id;
+
+  useEffect(() => {
+    if (residentId) {
+      loadFinancials();
+    }
+  }, [residentId]);
+
+  const loadFinancials = async () => {
+    try {
+      setLoading(true);
+      const data = await getPaymentHistory(residentId);
+      setFinancials(data);
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.transactionCode.trim()) {
+      setMessage({ type: 'error', text: 'Please enter the M-Pesa transaction code' });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setMessage({ type: '', text: '' });
+      
+      const response = await recordPayment(residentId, formData.amount, formData.transactionCode.trim());
+      
+      if (response.success) {
+        setMessage({ type: 'success', text: response.message });
+        setFormData({ amount: 200, transactionCode: '' });
+        loadFinancials();
+      } else {
+        setMessage({ type: 'error', text: response.message || 'Failed to record payment' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-KE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading payment information...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bills-page">
+      <h1>My Dues & Payments</h1>
+      
+      {message.text && (
+        <div className={`message ${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      {/* Summary Cards */}
+      <div className="summary-cards">
+        <div className="summary-card">
+          <div className="card-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="M2 10h20" />
+            </svg>
+          </div>
+          <div className="card-content">
+            <span className="card-label">Monthly Charge</span>
+            <span className="card-value">{formatCurrency(financials.monthly_rate)}</span>
+          </div>
+        </div>
+
+        <div className="summary-card">
+          <div className="card-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <div className="card-content">
+            <span className="card-label">Total Paid</span>
+            <span className="card-value">{formatCurrency(financials.total_paid)}</span>
+          </div>
+        </div>
+
+        <div className={`summary-card ${financials.outstanding_balance > 0 ? 'balance-due' : 'balance-paid'}`}>
+          <div className={`card-icon ${financials.outstanding_balance > 0 ? 'red' : 'green'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          </div>
+          <div className="card-content">
+            <span className="card-label">Outstanding Balance</span>
+            <span className="card-value">{formatCurrency(financials.outstanding_balance)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Summary Info */}
+      <div className="payment-info">
+        <div className="info-item">
+          <span className="info-label">Resident:</span>
+          <span className="info-value">{financials.resident_name || 'N/A'}</span>
+        </div>
+        <div className="info-item">
+          <span className="info-label">House:</span>
+          <span className="info-value">{financials.house_number || 'N/A'}</span>
+        </div>
+        <div className="info-item">
+          <span className="info-label">Phase:</span>
+          <span className="info-value">{financials.phase || 'N/A'}</span>
+        </div>
+        <div className="info-item">
+          <span className="info-label">Months Charged:</span>
+          <span className="info-value">{financials.months_count} months</span>
+        </div>
+        <div className="info-item">
+          <span className="info-label">Total Dules:</span>
+          <span className="info-value">{formatCurrency(financials.total_dues)}</span>
+        </div>
+      </div>
+
+      <div className="content-grid">
+        {/* Payment Form */}
+        <div className="payment-form-card">
+          <h2>Record Payment</h2>
+          <div className="paybill-info">
+            <h3>M-Pesa Payment Instructions</h3>
+            <p><strong>Paybill Number:</strong> NHC Welfare</p>
+            <p><strong>Account Number:</strong> NHC Welfare Account</p>
+            <p><strong>Amount:</strong> Kshs 200</p>
+          </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="transactionCode">M-Pesa Transaction Code</label>
+              <input
+                type="text"
+                id="transactionCode"
+                value={formData.transactionCode}
+                onChange={(e) => setFormData({ ...formData, transactionCode: e.target.value.toUpperCase() })}
+                placeholder="e.g., QWE123XYZ"
+                maxLength="10"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="amount">Amount (Kshs)</label>
+              <input
+                type="number"
+                id="amount"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                min="1"
+                max="10000"
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={submitting}>
+              {submitting ? 'Recording...' : 'Record Payment'}
+            </button>
+          </form>
+        </div>
+
+        {/* Payment History */}
+        <div className="payment-history-card">
+          <h2>Payment History</h2>
+          <div className="history-list">
+            {financials.payment_history.length === 0 ? (
+              <div className="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                  <polyline points="13 2 13 9 20 9" />
+                </svg>
+                <p>No payment records found</p>
+              </div>
+            ) : (
+              <table className="history-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Transaction Code</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {financials.payment_history.map((payment) => (
+                    <tr key={payment.id}>
+                      <td>{formatDate(payment.payment_date)}</td>
+                      <td className="transaction-code">{payment.transaction_code}</td>
+                      <td className="amount">{formatCurrency(payment.amount)}</td>
+                      <td>
+                        <span className={`status ${payment.status.toLowerCase()}`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        .bills-page {
+          padding: 20px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .bills-page h1 {
+          font-size: 1.5rem;
+          color: #1f2937;
+          margin-bottom: 20px;
+          font-weight: 600;
+        }
+
+        .message {
+          padding: 12px 16px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          font-size: 0.875rem;
+        }
+
+        .message.error {
+          background-color: #fee2e2;
+          color: #dc2626;
+          border: 1px solid #fecaca;
+        }
+
+        .message.success {
+          background-color: #dcfce7;
+          color: #16a34a;
+          border: 1px solid #bbf7d0;
+        }
+
+        .summary-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+
+        .summary-card {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          border-left: 4px solid #3b82f6;
+        }
+
+        .summary-card.balance-due {
+          border-left-color: #ef4444;
+        }
+
+        .summary-card.balance-paid {
+          border-left-color: #22c55e;
+        }
+
+        .card-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .card-icon svg {
+          width: 24px;
+          height: 24px;
+        }
+
+        .card-icon.blue {
+          background-color: #dbeafe;
+          color: #3b82f6;
+        }
+
+        .card-icon.green {
+          background-color: #dcfce7;
+          color: #22c55e;
+        }
+
+        .card-icon.red {
+          background-color: #fee2e2;
+          color: #ef4444;
+        }
+
+        .card-content {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .card-label {
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+
+        .card-value {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .payment-info {
+          background: white;
+          border-radius: 12px;
+          padding: 16px 20px;
+          margin-bottom: 24px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 24px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-item {
+          display: flex;
+          gap: 8px;
+        }
+
+        .info-label {
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+
+        .info-value {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #1f2937;
+        }
+
+        .content-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+          .content-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .payment-form-card,
+        .payment-history-card {
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-form-card h2,
+        .payment-history-card h2 {
+          font-size: 1.125rem;
+          color: #1f2937;
+          margin-bottom: 16px;
+          font-weight: 600;
+        }
+
+        .paybill-info {
+          background: #f3f4f6;
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 20px;
+        }
+
+        .paybill-info h3 {
+          font-size: 0.875rem;
+          color: #374151;
+          margin-bottom: 12px;
+          font-weight: 600;
+        }
+
+        .paybill-info p {
+          font-size: 0.875rem;
+          color: #4b5563;
+          margin-bottom: 4px;
+        }
+
+        .form-group {
+          margin-bottom: 16px;
+        }
+
+        .form-group label {
+          display: block;
+          font-size: 0.875rem;
+          color: #374151;
+          margin-bottom: 6px;
+          font-weight: 500;
+        }
+
+        .form-group input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-primary {
+          width: 100%;
+          padding: 12px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: #2563eb;
+        }
+
+        .btn-primary:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        .history-list {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          color: #9ca3af;
+        }
+
+        .empty-state svg {
+          width: 48px;
+          height: 48px;
+          margin-bottom: 12px;
+        }
+
+        .history-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.875rem;
+        }
+
+        .history-table th {
+          text-align: left;
+          padding: 12px 8px;
+          border-bottom: 2px solid #e5e7eb;
+          color: #6b7280;
+          font-weight: 500;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .history-table td {
+          padding: 12px 8px;
+          border-bottom: 1px solid #e5e7eb;
+          color: #374151;
+        }
+
+        .history-table tbody tr:hover {
+          background-color: #f9fafb;
+        }
+
+        .transaction-code {
+          font-family: monospace;
+          font-weight: 500;
+        }
+
+        .amount {
+          font-weight: 500;
+        }
+
+        .status {
+          display: inline-block;
+          padding: 4px 8px;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+
+        .status.completed {
+          background-color: #dcfce7;
+          color: #16a34a;
+        }
+
+        .status.pending {
+          background-color: #fef3c7;
+          color: #d97706;
+        }
+
+        .status.failed {
+          background-color: #fee2e2;
+          color: #dc2626;
+        }
+
+        .loading-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 300px;
+          color: #6b7280;
+        }
+
+        .loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid #e5e7eb;
+          border-top-color: #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default Bills;

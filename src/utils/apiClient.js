@@ -142,8 +142,91 @@ export const getVacantHouses = async () => {
 };
 
 /**
+ * Get payment history and balance for a resident
+ * @param {number} residentId - The resident's ID
+ * @returns {Promise<object>} - Object with payment history and balance summary
+ */
+export const getPaymentHistory = async (residentId) => {
+  const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
+    method: 'POST',
+    body: JSON.stringify({ resident_id: residentId }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  return {
+    resident_id: response.resident_id,
+    resident_name: response.resident_name,
+    house_number: response.house_number,
+    phase: response.phase,
+    monthly_rate: response.monthly_rate || 200,
+    months_count: response.months_count || 0,
+    total_dues: response.total_dues || 0,
+    total_paid: response.total_paid || 0,
+    outstanding_balance: response.outstanding_balance || 0,
+    payment_history: response.payment_history || [],
+  };
+};
+
+/**
+ * Trigger M-Pesa STK Push for payment
+ * @param {number} residentId - The resident's ID
+ * @param {string} phoneNumber - M-Pesa phone number
+ * @param {number} amount - Payment amount (Kshs)
+ * @returns {Promise<object>} - Response with checkout request ID
+ */
+export const initiateSTKPush = async (residentId, phoneNumber, amount) => {
+  const response = await apiRequest(API_ENDPOINTS.initiateSTKPush, {
+    method: 'POST',
+    body: JSON.stringify({
+      resident_id: residentId,
+      phone_number: phoneNumber,
+      amount: amount,
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Check payment status by checkout request ID
+ * @param {string} checkoutRequestId - The checkout request ID from STK push
+ * @returns {Promise<object>} - Payment status object
+ */
+export const checkPaymentStatus = async (checkoutRequestId) => {
+  const response = await apiRequest(API_ENDPOINTS.checkPaymentStatus, {
+    method: 'POST',
+    body: JSON.stringify({ checkout_request_id: checkoutRequestId }),
+  });
+
+  return response;
+};
+
+/**
+ * Record a manual payment (fallback option)
+ * @param {number} residentId - The resident's ID
+ * @param {number} amount - Payment amount (Kshs)
+ * @param {string} transactionCode - M-Pesa transaction code
+ * @returns {Promise<object>} - Response with success status
+ */
+export const recordPayment = async (residentId, amount, transactionCode) => {
+  const response = await apiRequest(API_ENDPOINTS.recordPayment, {
+    method: 'POST',
+    body: JSON.stringify({
+      resident_id: residentId,
+      amount: amount,
+      transaction_code: transactionCode,
+    }),
+  });
+
+  return response;
+};
+
+/**
  * Get the stored resident ID
- * @returns {string|null} - Resident UUID or null
+ * @returns {string|null} - Resident ID or null
  */
 export const getStoredResidentId = () => {
   return localStorage.getItem(STORAGE_KEYS.RESIDENT_ID);
@@ -178,6 +261,10 @@ export default {
   apiRequest,
   loginResident,
   getVacantHouses,
+  getPaymentHistory,
+  initiateSTKPush,
+  checkPaymentStatus,
+  recordPayment,
   getStoredResidentId,
   getStoredUser,
   clearAuthData,

@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Chat from './pages/Chat'
 import VacantHouses from './pages/VacantHouses'
 import Notices from './pages/Notices'
+import Bills from './pages/Bills'
 import ShareOpinion from './pages/ShareOpinion'
 import Announcements from './pages/Announcements'
 import Profile from './pages/Profile'
@@ -35,6 +36,11 @@ function App() {
         <Route path="/notices" element={
           <ProtectedRoute>
             <Notices />
+          </ProtectedRoute>
+        } />
+        <Route path="/bills" element={
+          <ProtectedRoute>
+            <Bills />
           </ProtectedRoute>
         } />
         <Route path="/share-opinion" element={
