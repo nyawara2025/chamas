@@ -13,8 +13,6 @@ import ShareOpinion from './pages/ShareOpinion'
 import Announcements from './pages/Announcements'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
-import BroadcastAdmin from './pages/BroadcastAdmin'
-import BroadcastsList from './pages/BroadcastsList'
 
 function App() {
   return (
@@ -58,16 +56,6 @@ function App() {
         <Route path="/chat" element={
           <ProtectedRoute>
             <Chat />
-          </ProtectedRoute>
-        } />
-        <Route path="/broadcast-admin" element={
-          <ProtectedRoute>
-            <BroadcastAdmin />
-          </ProtectedRoute>
-        } />
-        <Route path="/broadcasts" element={
-          <ProtectedRoute>
-            <BroadcastsList />
           </ProtectedRoute>
         } />
       </Routes>

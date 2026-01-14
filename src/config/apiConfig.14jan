@@ -40,6 +40,9 @@ export const API_ENDPOINTS = {
   submitOpinion: `${getBaseUrl()}/nhc-submit-opinion`,
   getNotices: `${getBaseUrl()}/nhc-notices`,
 
+  // Sokoni (Market Place) Operations
+  getActiveShops: `${getBaseUrl()}/nhc-active-shops`,
+
   // M-Pesa Callback
   paymentCallback: `${getBaseUrl()}/nhc-payment-callback`,
 };
@@ -58,6 +61,7 @@ export const WEBHOOK_PATHS = {
   recordPayment: 'nhc-record-payment',
   getAnnouncements: 'nhc-announcements',
   paymentCallback: 'nhc-payment-callback',
+  getActiveShops: 'nhc-active-shops',
 };
 
 // M-Pesa Configuration

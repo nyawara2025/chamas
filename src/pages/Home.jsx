@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStoredUser, getActiveShops } from '../utils/apiClient'
+import { getStoredUser, getActiveShops, getUnreadBroadcastsCount } from '../utils/apiClient'
 import SokoniModal from '../components/SokoniModal'
 
 const Home = () => {
@@ -10,6 +10,7 @@ const Home = () => {
   const [user, setUser] = useState(null)
   const [sokoniOpen, setSokoniOpen] = useState(false)
   const [shops, setShops] = useState([])
+  const [unreadBroadcasts, setUnreadBroadcasts] = useState(0)
 
   useEffect(() => {
     // Get stored user data
@@ -17,6 +18,9 @@ const Home = () => {
     if (storedUser) {
       setUser(storedUser)
     }
+
+    // Fetch unread broadcasts count
+    loadUnreadBroadcasts()
 
     const hour = currentTime.getHours()
     if (hour < 12) setGreeting('Good morning')
@@ -26,6 +30,15 @@ const Home = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
+
+  const loadUnreadBroadcasts = async () => {
+    try {
+      const count = await getUnreadBroadcastsCount()
+      setUnreadBroadcasts(count)
+    } catch (error) {
+      console.error('Error fetching unread broadcasts:', error)
+    }
+  }
 
   const handleOpenSokoni = async () => {
     setSokoniOpen(true)
@@ -63,7 +76,8 @@ const Home = () => {
             { label: 'Sokoni', color: '#D1FAE5', textColor: '#059669', action: handleOpenSokoni, icon: '🏪' },
             { label: 'Pay your dues', color: '#DBEAFE', textColor: '#2563EB', route: '/bills', icon: '💳' },
             { label: 'Share Opinion', color: '#FEE2E2', textColor: '#DC2626', route: '/share-opinion', icon: '🗣️' },
-            { label: 'Updates', color: '#EDE9FE', textColor: '#7C3AED', route: '/announcements', icon: '📢' },
+            { label: 'Broadcasts', color: '#EDE9FE', textColor: '#7C3AED', route: '/broadcasts', icon: '📢', badge: unreadBroadcasts },
+            { label: 'Updates', color: '#FEF3C7', textColor: '#D97706', route: '/announcements', icon: '📰' },
           ].map((action) => (
             <button
               key={action.label}
@@ -88,9 +102,30 @@ const Home = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.25rem'
+                fontSize: '1.25rem',
+                position: 'relative'
               }}>
                 {action.icon}
+                {action.badge > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    background: '#ef4444',
+                    color: 'white',
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
+                    minWidth: '16px',
+                    height: '16px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 4px'
+                  }}>
+                    {action.badge > 99 ? '99+' : action.badge}
+                  </span>
+                )}
               </div>
               <span style={{ fontSize: '0.75rem', color: action.textColor, fontWeight: 500 }}>
                 {action.label}

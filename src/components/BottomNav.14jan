@@ -9,9 +9,9 @@ const BottomNav = () => {
     { path: '/', label: 'Home', icon: '🏠' },
     { path: '/chat', label: 'Chat', icon: '💬' },
     { path: '/vacant-houses', label: 'Vacant', icon: '🏢' },
-    { path: '/notices', label: 'Notices', icon: '📋' },
-    { path: '/share-opinion', label: 'Opinion', icon: '🗣️' },
-    { path: '/broadcasts', label: 'Broadcast', icon: '📢' },
+    { path: '/bills', label: 'Bills', icon: '💰' },
+    { path: '/complaints', label: 'Issues', icon: '📋' },
+    { path: '/announcements', label: 'Updates', icon: '📢' },
   ]
 
   return (

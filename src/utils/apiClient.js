@@ -106,6 +106,7 @@ export const loginResident = async (email, apartmentId) => {
     email: response.email,
     phone: response.phone,
     apartment_id: response.apartment_id,
+    resident_type: response.resident_type, // Add this!
     // Apartment details from joined query
     apartment_number: response.apartment_number,
     block_name: response.block_name,
@@ -276,6 +277,146 @@ export const getActiveShops = async () => {
   return response.shops || response.data || [];
 };
 
+/**
+ * Get broadcasts for the logged-in user
+ * @returns {Promise<Array>} - Array of broadcast objects
+ */
+export const getBroadcasts = async () => {
+  const residentId = getStoredResidentId();
+  if (!residentId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.getBroadcasts, {
+    method: 'POST',
+    body: JSON.stringify({ resident_id: parseInt(residentId) }),
+  });
+
+  // Validate response structure
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  // Handle different response formats
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.broadcasts && Array.isArray(response.broadcasts)) {
+    return response.broadcasts;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  console.warn('Unexpected broadcasts format:', response);
+  return [];
+};
+
+/**
+ * Get count of unread broadcasts for the user
+ * @returns {Promise<number>} - Count of unread broadcasts
+ */
+export const getUnreadBroadcastsCount = async () => {
+  const residentId = getStoredResidentId();
+  if (!residentId) {
+    return 0;
+  }
+
+  try {
+    const broadcasts = await getBroadcasts();
+    const unreadCount = broadcasts.filter(b => !b.read_status).length;
+    return unreadCount;
+  } catch (error) {
+    console.error('Error getting unread broadcasts count:', error);
+    return 0;
+  }
+};
+
+/**
+ * Mark a broadcast as read
+ * @param {number} broadcastId - The broadcast ID to mark as read
+ * @returns {Promise<object>} - Response from server
+ */
+export const markBroadcastRead = async (broadcastId) => {
+  const residentId = getStoredResidentId();
+  if (!residentId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.markBroadcastRead, {
+    method: 'POST',
+    body: JSON.stringify({
+      broadcast_id: broadcastId,
+      resident_id: parseInt(residentId),
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Create a new broadcast (admin only)
+ * @param {object} broadcastData - The broadcast data
+ * @returns {Promise<object>} - Response from server
+ */
+export const createBroadcast = async (broadcastData) => {
+  const user = getStoredUser();
+  if (!user) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.createBroadcast, {
+    method: 'POST',
+    body: JSON.stringify({
+      sender_id: parseInt(user.id),
+      sender_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+      sender_role: user.resident_type || user.role || 'user', // Include role for N8N verification
+      title: broadcastData.title,
+      content: broadcastData.content,
+      recipient_type: broadcastData.recipientType,
+      recipient_value: broadcastData.recipientValue || null,
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Get all phases for filtering (admin only)
+ * @returns {Promise<Array>} - Array of phase objects
+ */
+export const getPhases = async () => {
+  const response = await apiRequest(API_ENDPOINTS.getPhases, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  return response.phases || response.data || [];
+};
+
+/**
+ * Get all blocks for filtering (admin only)
+ * @returns {Promise<Array>} - Array of block objects
+ */
+export const getBlocks = async () => {
+  const response = await apiRequest(API_ENDPOINTS.getBlocks, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  return response.blocks || response.data || [];
+};
+
 export default {
   apiRequest,
   loginResident,
@@ -288,5 +429,11 @@ export default {
   getStoredUser,
   clearAuthData,
   getActiveShops,
+  getBroadcasts,
+  getUnreadBroadcastsCount,
+  markBroadcastRead,
+  createBroadcast,
+  getPhases,
+  getBlocks,
   STORAGE_KEYS,
 };

@@ -43,6 +43,13 @@ export const API_ENDPOINTS = {
   // Sokoni (Market Place) Operations
   getActiveShops: `${getBaseUrl()}/nhc-active-shops`,
 
+  // Broadcast Operations
+  getBroadcasts: `${getBaseUrl()}/nhc-broadcasts`,
+  createBroadcast: `${getBaseUrl()}/nhc-create-broadcast`,
+  markBroadcastRead: `${getBaseUrl()}/nhc-broadcast-read`,
+  getPhases: `${getBaseUrl()}/nhc-phases`,
+  getBlocks: `${getBaseUrl()}/nhc-blocks`,
+
   // M-Pesa Callback
   paymentCallback: `${getBaseUrl()}/nhc-payment-callback`,
 };
@@ -62,6 +69,11 @@ export const WEBHOOK_PATHS = {
   getAnnouncements: 'nhc-announcements',
   paymentCallback: 'nhc-payment-callback',
   getActiveShops: 'nhc-active-shops',
+  getBroadcasts: 'nhc-broadcasts',
+  createBroadcast: 'nhc-create-broadcast',
+  markBroadcastRead: 'nhc-broadcast-read',
+  getPhases: 'nhc-phases',
+  getBlocks: 'nhc-blocks',
 };
 
 // M-Pesa Configuration
