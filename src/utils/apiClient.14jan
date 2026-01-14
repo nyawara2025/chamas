@@ -257,6 +257,32 @@ export const clearAuthData = () => {
   localStorage.removeItem(STORAGE_KEYS.RESIDENT_ID);
 };
 
+/**
+ * Get active shops for Sokoni (Market Place)
+ * @returns {Promise<Array>} - Array of shop objects with id, name, and description
+ */
+export const getActiveShops = async () => {
+  const response = await apiRequest(API_ENDPOINTS.getActiveShops, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+  // TEMPORARY DEBUG - Remove after testing
+  console.log('N8N Response:', JSON.stringify(response, null, 2));
+  console.log('Response type:', typeof response);
+  console.log('Is array:', Array.isArray(response));
+  console.log('Has shops:', response?.shops);
+  console.log('Has data:', response?.data);
+
+  // Validate response structure
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  // Return the shops array, defaulting to empty array if not present
+  return response.shops || response.data || [];
+};
+
 export default {
   apiRequest,
   loginResident,
@@ -268,5 +294,6 @@ export default {
   getStoredResidentId,
   getStoredUser,
   clearAuthData,
+  getActiveShops,
   STORAGE_KEYS,
 };
