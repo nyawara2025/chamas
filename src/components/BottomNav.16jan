@@ -11,7 +11,6 @@ const BottomNav = () => {
     { path: '/vacant-houses', label: 'Vacant', icon: '🏢' },
     { path: '/notices', label: 'Notices', icon: '📋' },
     { path: '/share-opinion', label: 'Opinion', icon: '🗣️' },
-    { path: '/my-inquiries', label: 'Inquiries', icon: '📩' },
     { path: '/broadcasts', label: 'Broadcast', icon: '📢' },
   ]
 

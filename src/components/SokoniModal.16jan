@@ -15,16 +15,6 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
     }
   }, [isOpen]);
 
-  // Generate a unique session ID for tracking inquiries
-  const generateSessionId = () => {
-    const storedSession = localStorage.getItem('nhc_session_id');
-    if (storedSession) return storedSession;
-
-    const newSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('nhc_session_id', newSessionId);
-    return newSessionId;
-  };
-
   const handleVisitShop = () => {
     if (!selectedShopId) return;
 
@@ -33,11 +23,8 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
 
     setIsLoading(true);
 
-    // Generate/store session ID for tracking
-    const sessionId = generateSessionId();
-
-    // Redirect to the marketplace with shop and session parameters
-    const marketplaceUrl = `https://tenearwhatsappcheckins.pages.dev?shop_id=${selectedShop.id}&session_id=${sessionId}`;
+    // Redirect to the marketplace with the shop parameter
+    const marketplaceUrl = `https://tenearwhatsappcheckins.pages.dev?shop_id=${selectedShop.id}`;
 
     // Open in a new tab
     window.open(marketplaceUrl, '_blank');

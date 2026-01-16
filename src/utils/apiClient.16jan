@@ -417,91 +417,6 @@ export const getBlocks = async () => {
   return response.blocks || response.data || [];
 };
 
-/**
- * Get responses for a specific inquiry (customer view)
- * @param {string} inquiryId - The inquiry ID to get responses for
- * @returns {Promise<Array>} - Array of response objects
- */
-export const getInquiryResponses = async (inquiryId) => {
-  if (!inquiryId) {
-    throw new Error('Inquiry ID is required');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.getInquiryResponses, {
-    method: 'POST',
-    body: JSON.stringify({ inquiry_id: inquiryId }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Handle different response formats
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (response.responses && Array.isArray(response.responses)) {
-    return response.responses;
-  }
-
-  return response.data || [];
-};
-
-/**
- * Get all customer conversations (inquiries with responses)
- * Used in customer app to show their conversation history
- * @returns {Promise<Array>} - Array of conversation objects
- */
-export const getCustomerConversations = async () => {
-  const sessionId = localStorage.getItem('nhc_session_id');
-  if (!sessionId) {
-    throw new Error('Session ID not found. Please visit a shop first.');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.getCustomerConversations, {
-    method: 'POST',
-    body: JSON.stringify({ session_id: sessionId }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Handle different response formats
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (response.conversations && Array.isArray(response.conversations)) {
-    return response.conversations;
-  }
-
-  return response.data || [];
-};
-
-/**
- * Mark a response as read by the customer
- * @param {number} responseId - The response ID to mark as read
- * @returns {Promise<object>} - Response from server
- */
-export const markResponseRead = async (responseId) => {
-  const sessionId = localStorage.getItem('nhc_session_id');
-  if (!sessionId) {
-    throw new Error('Session ID not found');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.markResponseRead, {
-    method: 'POST',
-    body: JSON.stringify({
-      response_id: responseId,
-      session_id: sessionId,
-    }),
-  });
-
-  return response;
-};
-
 export default {
   apiRequest,
   loginResident,
@@ -520,8 +435,5 @@ export default {
   createBroadcast,
   getPhases,
   getBlocks,
-  getInquiryResponses,
-  getCustomerConversations,
-  markResponseRead,
   STORAGE_KEYS,
 };

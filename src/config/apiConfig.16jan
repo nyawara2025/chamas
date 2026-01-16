@@ -52,11 +52,6 @@ export const API_ENDPOINTS = {
 
   // M-Pesa Callback
   paymentCallback: `${getBaseUrl()}/nhc-payment-callback`,
-
-  // Inquiry Response Operations (Customer App)
-  getInquiryResponses: `${getBaseUrl()}/nhc-get-inquiry-responses`,
-  getCustomerConversations: `${getBaseUrl()}/nhc-customer-conversations`,
-  markResponseRead: `${getBaseUrl()}/nhc-mark-response-read`,
 };
 
 // Webhook paths (for reference)
@@ -79,10 +74,6 @@ export const WEBHOOK_PATHS = {
   markBroadcastRead: 'nhc-broadcast-read',
   getPhases: 'nhc-phases',
   getBlocks: 'nhc-blocks',
-  // Inquiry Response Operations
-  getInquiryResponses: 'nhc-get-inquiry-responses',
-  getCustomerConversations: 'nhc-customer-conversations',
-  markResponseRead: 'nhc-mark-response-read',
 };
 
 // M-Pesa Configuration
