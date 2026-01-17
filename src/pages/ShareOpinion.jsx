@@ -18,20 +18,20 @@ const ShareOpinion = () => {
     setTopics([
       {
         id: 1,
-        title: 'Estate Security',
-        description: 'Share your thoughts on current security measures',
+        title: 'Church Ministries',
+        description: 'Share your thoughts on the Ministries',
         icon: '🔒'
       },
       {
         id: 2,
-        title: 'Cleanliness & Maintenance',
-        description: 'Feedback on common areas and facilities',
+        title: 'Church Welfare',
+        description: 'Church welfare matters',
         icon: '🧹'
       },
       {
         id: 3,
         title: 'Community Events',
-        description: 'Suggestions for resident gatherings',
+        description: 'Suggestions for church gatherings',
         icon: '🎉'
       },
       {

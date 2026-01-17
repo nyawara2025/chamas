@@ -5,31 +5,6 @@ import { getStoredUser, clearAuthData } from '../utils/apiClient'
 const Header = () => {
   const navigate = useNavigate()
   const user = getStoredUser()
-  
-  // Get dynamic values from config
-  const getConfigValue = () => {
-    try {
-      if (window.config) {
-        return {
-          orgName: window.config.identity?.name || 'App',
-          tagline: window.config.branding?.tagline || window.config.identity?.description || 'Member Portal',
-          primaryColor: window.config.theme?.colors?.primary || '#0891B2',
-          secondaryColor: window.config.theme?.colors?.secondary || '#0E7490',
-        };
-      }
-    } catch (e) {
-      console.warn('Could not load config:', e);
-    }
-    return {
-      orgName: 'App',
-      tagline: 'Member Portal',
-      primaryColor: '#0891B2',
-      secondaryColor: '#0E7490',
-    };
-  };
-
-  const config = getConfigValue();
-  const gradient = `linear-gradient(135deg, ${config.primaryColor} 0%, ${config.secondaryColor} 100%)`;
 
   const handleLogout = () => {
     clearAuthData()
@@ -38,7 +13,7 @@ const Header = () => {
 
   return (
     <header style={{
-      background: gradient,
+      background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
       color: 'white',
       padding: '16px',
       display: 'flex',
@@ -47,10 +22,10 @@ const Header = () => {
     }}>
       <div>
         <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
-          {config.orgName}
+          NHC Langata
         </h1>
         <p style={{ margin: '4px 0 0', fontSize: '0.75rem', opacity: 0.9 }}>
-          {config.tagline}
+          Residential Portal
         </p>
       </div>
       <button

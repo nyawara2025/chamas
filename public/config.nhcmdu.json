@@ -1,0 +1,90 @@
+{
+  "identity": {
+    "orgId": "nhc-langata",
+    "name": "NHC MDU",
+    "description": "NHC MDU Langata Resident Services",
+    "logoUrl": "/logo.png",
+    "faviconUrl": "/favicon.ico"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#25D366",
+      "secondary": "#128C7E",
+      "background": "#F5F5F5",
+      "text": "#333333",
+      "success": "#4CAF50",
+      "warning": "#FF9800",
+      "error": "#F44336"
+    },
+    "borderRadius": "rounded-lg"
+  },
+  "labels": {
+    "entityName": "Resident",
+    "entityNamePlural": "Residents",
+    "adminName": "Admin",
+    "adminNamePlural": "Admins",
+    "marketplaceName": "Sokoni",
+    "broadcastName": "Broadcasts",
+    "announcementName": "Announcements",
+    "complaintName": "Issues",
+    "paymentName": "Payments",
+    "welcomeMessage": "Welcome to",
+    "loginPrompt": "Enter your details to continue",
+    "noDataMessage": "No records found",
+    "loadingMessage": "Loading...",
+    "apartmentIdLabel": "Apartment ID / House Number",
+    "apartmentPlaceholder": "e.g., 1, 2, 3...",
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "footerText": "Property Management System"
+  },
+  "features": {
+    "marketplace": true,
+    "payments": true,
+    "complaints": true,
+    "broadcasts": true,
+    "announcements": true,
+    "chat": true,
+    "myInquiries": true,
+    "vacantHouses": true,
+    "shareOpinion": true,
+    "allowGuestAccess": false
+  },
+  "modules": {
+    "auth": {
+      "method": "email",
+      "requireApproval": false,
+      "requireApartmentId": true,
+      "roles": ["resident", "tenant", "owner"]
+    },
+    "marketplace": {
+      "name": "Sokoni",
+      "categories": ["Shops", "Services", "Products", "Food"],
+      "allowServices": true,
+      "enableInquiries": true,
+      "enableResponses": true
+    },
+    "broadcasts": {
+      "adminOnly": false,
+      "allowReplies": true,
+      "maxMessageLength": 500
+    },
+    "support": {
+      "contactEmail": "support@example.com",
+      "whatsappNumber": "+254700000000",
+      "emergencyNumber": "+254700000001"
+    }
+  },
+  "api": {
+    "webhookBaseUrl": "https://n8n.tenear.com/webhook",
+    "headers": {
+      "x-app-version": "1.0.0"
+    }
+  },
+  "navigation": {
+    "showBottomNav": true,
+    "showHeader": true,
+    "menuOrder": ["home", "broadcasts", "marketplace", "myInquiries", "profile"]
+  }
+}

@@ -50,10 +50,6 @@ export const ConfigProvider = ({ children }) => {
           );
         }
         
-        // Store config globally for API client access
-        window.config = configData;
-        localStorage.setItem('app_config', JSON.stringify(configData));
-        
         setConfig(configData);
         setLoading(false);
       } catch (err) {

@@ -8,12 +8,39 @@ const BroadcastsList = () => {
   const [broadcasts, setBroadcasts] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all' or 'unread'
+  const [filter, setFilter] = useState('all');
   const [userIsAdmin, setUserIsAdmin] = useState(false);
+
+  // Get dynamic values from config
+  const getConfig = () => {
+    try {
+      if (window.config) {
+        return {
+          title: window.config.labels?.broadcastName || 'Broadcasts',
+          subtitle: window.config.labels?.broadcastSubtitle || 'Messages',
+          icon: window.config.labels?.broadcastIcon || '📢',
+          categories: window.config.modules?.broadcasts?.categories || [],
+          primaryColor: window.config.theme?.colors?.primary || '#0891B2',
+          secondaryColor: window.config.theme?.colors?.secondary || '#0E7490',
+        };
+      }
+    } catch (e) {
+      console.warn('Could not load config:', e);
+    }
+    return {
+      title: 'Broadcasts',
+      subtitle: 'Messages',
+      icon: '📢',
+      categories: [],
+      primaryColor: '#0891B2',
+      secondaryColor: '#0E7490',
+    };
+  };
+
+  const config = getConfig();
 
   useEffect(() => {
     loadBroadcasts();
-    // Check admin status
     setUserIsAdmin(isAdmin());
   }, []);
 
@@ -57,6 +84,7 @@ const BroadcastsList = () => {
 
   const filteredBroadcasts = broadcasts.filter(b => {
     if (filter === 'unread') return !b.read_status;
+    if (filter !== 'all' && config.categories.length > 0) return b.category === filter;
     return true;
   });
 
@@ -69,7 +97,7 @@ const BroadcastsList = () => {
           style={{
             background: 'none',
             border: 'none',
-            color: '#0891B2',
+            color: config.primaryColor,
             cursor: 'pointer',
             fontSize: '1rem',
             marginBottom: '12px',
@@ -81,10 +109,10 @@ const BroadcastsList = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>
-              📢 Broadcasts
+              {config.icon} {config.title}
             </h1>
             <p style={{ margin: '4px 0 0', color: '#64748b' }}>
-              Messages from management
+              {config.subtitle}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -116,7 +144,7 @@ const BroadcastsList = () => {
             padding: '8px 16px',
             border: 'none',
             borderRadius: '8px',
-            background: filter === 'all' ? '#0891B2' : 'transparent',
+            background: filter === 'all' ? config.primaryColor : 'transparent',
             color: filter === 'all' ? 'white' : '#64748b',
             cursor: 'pointer',
             fontWeight: 500,
@@ -131,7 +159,7 @@ const BroadcastsList = () => {
             padding: '8px 16px',
             border: 'none',
             borderRadius: '8px',
-            background: filter === 'unread' ? '#0891B2' : 'transparent',
+            background: filter === 'unread' ? config.primaryColor : 'transparent',
             color: filter === 'unread' ? 'white' : '#64748b',
             cursor: 'pointer',
             fontWeight: 500,
@@ -156,7 +184,54 @@ const BroadcastsList = () => {
         </button>
       </div>
 
-      {/* Broadcasts List */}
+      {/* Category Filters (for Sermons with categories) */}
+      {config.categories.length > 0 && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '16px',
+          overflowX: 'auto',
+          paddingBottom: '8px'
+        }}>
+          <button
+            onClick={() => setFilter('all')}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid',
+              borderColor: filter === 'all' ? config.primaryColor : '#e5e7eb',
+              borderRadius: '16px',
+              background: filter === 'all' ? config.primaryColor : 'white',
+              color: filter === 'all' ? 'white' : '#64748b',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            All
+          </button>
+          {config.categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setFilter(category)}
+              style={{
+                padding: '6px 12px',
+                border: '1px solid',
+                borderColor: filter === category ? config.primaryColor : '#e5e7eb',
+                borderRadius: '16px',
+                background: filter === category ? config.primaryColor : 'white',
+                color: filter === category ? 'white' : '#64748b',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Broadcasts/Sermons List */}
       {isLoading ? (
         <div style={{
           display: 'flex',
@@ -170,12 +245,12 @@ const BroadcastsList = () => {
             width: '40px',
             height: '40px',
             border: '3px solid #e5e7eb',
-            borderTopColor: '#0891B2',
+            borderTopColor: config.primaryColor,
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             marginBottom: '16px'
           }} />
-          <p>Loading broadcasts...</p>
+          <p>Loading {config.title.toLowerCase()}...</p>
         </div>
       ) : filteredBroadcasts.length === 0 ? (
         <div style={{
@@ -189,7 +264,10 @@ const BroadcastsList = () => {
         }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📭</div>
           <p style={{ margin: 0 }}>
-            {filter === 'unread' ? 'No unread broadcasts' : 'No broadcasts yet'}
+            {filter === 'unread' 
+              ? `No unread ${config.title.toLowerCase()}` 
+              : `No ${config.title.toLowerCase()} yet`
+            }
           </p>
         </div>
       ) : (
@@ -199,8 +277,8 @@ const BroadcastsList = () => {
               key={broadcast.id}
               style={{
                 padding: '16px',
-                background: broadcast.read_status ? 'white' : '#f0f9ff',
-                border: broadcast.read_status ? '1px solid #e5e7eb' : '1px solid #bae6fd',
+                background: broadcast.read_status ? 'white' : `${config.primaryColor}10`,
+                border: broadcast.read_status ? '1px solid #e5e7eb' : `1px solid ${config.primaryColor}40`,
                 borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
@@ -227,7 +305,7 @@ const BroadcastsList = () => {
                       <span style={{
                         width: '8px',
                         height: '8px',
-                        background: '#0891B2',
+                        background: config.primaryColor,
                         borderRadius: '50%',
                         flexShrink: 0
                       }} />
@@ -238,8 +316,25 @@ const BroadcastsList = () => {
                     fontSize: '0.75rem',
                     color: '#64748b'
                   }}>
-                    From: {broadcast.sender_name} • {formatDate(broadcast.created_at)}
+                    {config.title === 'Sermons' && broadcast.speaker 
+                      ? `${broadcast.speaker} • ${formatDate(broadcast.created_at)}`
+                      : `From: ${broadcast.sender_name} • ${formatDate(broadcast.created_at)}`
+                    }
                   </p>
+                  {/* Show category if available */}
+                  {broadcast.category && (
+                    <span style={{
+                      display: 'inline-block',
+                      marginTop: '4px',
+                      padding: '2px 8px',
+                      background: `${config.primaryColor}20`,
+                      color: config.primaryColor,
+                      borderRadius: '12px',
+                      fontSize: '0.75rem'
+                    }}>
+                      {broadcast.category}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -273,7 +368,7 @@ const BroadcastsList = () => {
         }
       `}</style>
 
-      {/* Admin: Send Broadcast FAB */}
+      {/* Admin: Create Button FAB */}
       {userIsAdmin && (
         <button
           onClick={() => navigate('/broadcast-admin')}
@@ -284,10 +379,10 @@ const BroadcastsList = () => {
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
+            background: `linear-gradient(135deg, ${config.primaryColor} 0%, ${config.secondaryColor} 100%)`,
             color: 'white',
             border: 'none',
-            boxShadow: '0 4px 14px rgba(8, 145, 178, 0.4)',
+            boxShadow: `0 4px 14px ${config.primaryColor}66`,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -296,7 +391,7 @@ const BroadcastsList = () => {
             zIndex: 1000,
             transition: 'transform 0.2s ease'
           }}
-          title="Send Broadcast"
+          title={`Create ${config.title}`}
           onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
           onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
         >

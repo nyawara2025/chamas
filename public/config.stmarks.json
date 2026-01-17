@@ -1,0 +1,86 @@
+{
+  "identity": {
+    "orgId": "st-marks-church",
+    "name": "St. Mark's Church",
+    "description": "St. Mark's Church Member Portal",
+    "logoUrl": "/logos/church-logo.png",
+    "faviconUrl": "/favicon.ico"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#6B46C1",
+      "secondary": "#9F7AEA",
+      "background": "#FAF5FF",
+      "text": "#2D3748",
+      "success": "#48BB78",
+      "warning": "#ECC94B",
+      "error": "#F56565"
+    },
+    "borderRadius": "rounded-lg"
+  },
+  "labels": {
+    "entityName": "Member",
+    "entityNamePlural": "Members",
+    "adminName": "Deacon",
+    "adminNamePlural": "Deacons",
+    "marketplaceName": "Classifieds",
+    "broadcastName": "Sermons",
+    "announcementName": "Bulletins",
+    "complaintName": "Prayer Requests",
+    "paymentName": "Tithes & Offerings",
+    "welcomeMessage": "Welcome to",
+    "loginPrompt": "Enter your member details",
+    "noDataMessage": "No records found",
+    "loadingMessage": "Loading..."
+  },
+  "features": {
+    "marketplace": true,
+    "payments": true,
+    "complaints": true,
+    "broadcasts": true,
+    "announcements": true,
+    "chat": true,
+    "myInquiries": false,
+    "vacantHouses": false,
+    "shareOpinion": true,
+    "allowGuestAccess": false
+  },
+  "modules": {
+    "auth": {
+      "method": "phone",
+      "requireApproval": true,
+      "requireApartmentId": false,
+      "roles": ["member", "guest", "deacon", "elder"]
+    },
+    "marketplace": {
+      "name": "Classifieds",
+      "categories": ["Items for Sale", "Services", "Events", "Announcements"],
+      "allowServices": true,
+      "enableInquiries": true,
+      "enableResponses": true
+    },
+    "broadcasts": {
+      "adminOnly": false,
+      "allowReplies": true,
+      "maxMessageLength": 1000
+    },
+    "support": {
+      "contactEmail": "info@stmarkschurch.org",
+      "whatsappNumber": "+254700000000",
+      "pastorNumber": "+254700000002"
+    }
+  },
+  "api": {
+    "webhookBaseUrl": "https://n8n.tenear.com/webhook",
+    "headers": {
+      "x-app-version": "1.0.0",
+      "x-org-id": "st-marks-church"
+    }
+  },
+  "navigation": {
+    "showBottomNav": true,
+    "showHeader": true,
+    "menuOrder": ["home", "broadcasts", "announcements", "marketplace", "profile"]
+  }
+}

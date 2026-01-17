@@ -1,0 +1,86 @@
+{
+  "identity": {
+    "orgId": "great-women-initiative",
+    "name": "Great Women Initiative",
+    "description": "Women Empowerment & Support Network",
+    "logoUrl": "/logos/gwi-logo.png",
+    "faviconUrl": "/favicon.ico"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#DB2777",
+      "secondary": "#EC4899",
+      "background": "#FDF2F8",
+      "text": "#4A4A4A",
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "error": "#EF4444"
+    },
+    "borderRadius": "rounded-lg"
+  },
+  "labels": {
+    "entityName": "Member",
+    "entityNamePlural": "Members",
+    "adminName": "Coordinator",
+    "adminNamePlural": "Coordinators",
+    "marketplaceName": "Showcase",
+    "broadcastName": "Updates",
+    "announcementName": "Events",
+    "complaintName": "Support Cases",
+    "paymentName": "Contributions",
+    "welcomeMessage": "Welcome to",
+    "loginPrompt": "Enter your details to join",
+    "noDataMessage": "Nothing to show yet",
+    "loadingMessage": "Loading..."
+  },
+  "features": {
+    "marketplace": true,
+    "payments": true,
+    "complaints": true,
+    "broadcasts": true,
+    "announcements": true,
+    "chat": true,
+    "myInquiries": true,
+    "vacantHouses": false,
+    "shareOpinion": true,
+    "allowGuestAccess": true
+  },
+  "modules": {
+    "auth": {
+      "method": "phone",
+      "requireApproval": true,
+      "requireApartmentId": false,
+      "roles": ["member", "mentee", "mentor", "coordinator"]
+    },
+    "marketplace": {
+      "name": "Member Showcase",
+      "categories": ["Products", "Services", "Opportunities", "Events"],
+      "allowServices": true,
+      "enableInquiries": true,
+      "enableResponses": true
+    },
+    "broadcasts": {
+      "adminOnly": false,
+      "allowReplies": true,
+      "maxMessageLength": 800
+    },
+    "support": {
+      "contactEmail": "support@greatwomen.org",
+      "whatsappNumber": "+254700000000",
+      "helplineNumber": "+254700000004"
+    }
+  },
+  "api": {
+    "webhookBaseUrl": "https://n8n.tenear.com/webhook",
+    "headers": {
+      "x-app-version": "1.0.0",
+      "x-org-id": "great-women-initiative"
+    }
+  },
+  "navigation": {
+    "showBottomNav": true,
+    "showHeader": true,
+    "menuOrder": ["home", "announcements", "marketplace", "broadcasts", "profile"]
+  }
+}

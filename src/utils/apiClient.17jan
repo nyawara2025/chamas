@@ -117,45 +117,30 @@ export const loginResident = async (phone, identifier) => {
     }),
   });
 
-  // Handle array response (N8N might return multiple rows)
-  let userResponse = response;
-  if (Array.isArray(response) && response.length > 0) {
-    userResponse = response[0];
-  }
-
   // Validate response structure
-  if (!userResponse || !userResponse.id) {
+  if (!response || !response.id) {
     throw new Error('Invalid response from server');
-  }
-
-  // Handle full_name if first_name/last_name are not available
-  let firstName = userResponse.first_name;
-  let lastName = userResponse.last_name;
-  
-  if ((!firstName || !lastName) && userResponse.full_name) {
-    const nameParts = userResponse.full_name.split(' ');
-    firstName = nameParts[0] || '';
-    lastName = nameParts.slice(1).join(' ') || '';
   }
 
   // Store auth data
   const userData = {
-    id: userResponse.id,
-    username: userResponse.username,
-    first_name: firstName,
-    last_name: lastName,
-    full_name: userResponse.full_name,
-    email: userResponse.email,
-    phone: userResponse.phone || userResponse.admin_whatsapp,
-    role: userResponse.role,
-    org_id: userResponse.org_id,
-    shop_id: userResponse.shop_id,
+    id: response.id,
+    first_name: response.first_name,
+    last_name: response.last_name,
+    email: response.email,
+    phone: response.phone,
+    apartment_id: response.apartment_id,
+    resident_type: response.resident_type, // Add this!
+    // Apartment details from joined query
+    apartment_number: response.apartment_number,
+    block_name: response.block_name,
+    phase_name: response.phase_name,
   };
 
   localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(userData));
-  localStorage.setItem(STORAGE_KEYS.RESIDENT_ID, userResponse.id);
+  localStorage.setItem(STORAGE_KEYS.RESIDENT_ID, response.id);
 
-  return { user: userData, token: userResponse.token || 'api_token' };
+  return { user: userData, token: response.token || 'api_token' };
 };
 
 /**

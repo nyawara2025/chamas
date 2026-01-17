@@ -19,7 +19,7 @@ const Chat = () => {
       setMessages([
         {
           id: 1,
-          text: `Welcome to ${orgName} Support, ${user?.full_name || user?.first_name || user?.username || 'User'}! How can we help you today?`,
+          text: `Welcome to NHC Langata Support, ${user?.first_name || 'Resident'}! How can we help you today?`,
           sender: 'admin',
           timestamp: new Date().toISOString()
         }

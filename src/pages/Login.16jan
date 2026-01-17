@@ -9,8 +9,8 @@ const Login = () => {
   const { login } = useAuth()
   const { config, getLabel, isFeatureEnabled } = useConfig()
   
-  const [phone, setPhone] = useState('')
-  const [identifier, setIdentifier] = useState('')
+  const [email, setEmail] = useState('')
+  const [apartmentId, setApartmentId] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -31,22 +31,9 @@ const Login = () => {
   const entityName = getLabel('entityName', 'User')
   const loginPrompt = getLabel('loginPrompt', 'Enter your details to continue')
   const welcomeMessage = getLabel('welcomeMessage', 'Welcome')
-  
-  // Dynamic labels based on config
-  const phoneLabel = getLabel('phoneLabel', 'Phone Number')
-  const phonePlaceholder = getLabel('phonePlaceholder', '+254...')
-  const identifierLabel = getLabel('identifierLabel', 
-    config?.modules?.auth?.requireMemberId ? 'Membership Number' : 
-    config?.modules?.auth?.requireApartmentId ? 'Apartment Number' : 'Identifier'
-  )
-  const identifierPlaceholder = getLabel('identifierPlaceholder', 'e.g., MBC-001 or A101')
 
-  // Check which identifier is required
-  const requireMemberId = config?.modules?.auth?.requireMemberId === true
+  // Check if apartment ID is required based on config
   const requireApartmentId = config?.modules?.auth?.requireApartmentId !== false
-  const showIdentifier = requireMemberId || requireApartmentId
-  const memberIdLabel = getLabel('memberIdLabel', 'Membership Number')
-  const memberIdPlaceholder = getLabel('memberIdPlaceholder', 'e.g., MBC-001')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -54,7 +41,7 @@ const Login = () => {
     setLoading(true)
 
     try {
-      await login(phone, identifier)
+      await login(email, apartmentId)
       navigate(from, { replace: true })
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.')
@@ -153,32 +140,32 @@ const Login = () => {
             </div>
           )}
 
-          {/* Phone Number Field - Always shown */}
+          {/* Email Field */}
           <div style={{ marginBottom: '16px' }}>
             <label style={labelStyle}>
-              {phoneLabel}
+              Email
             </label>
             <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={phonePlaceholder}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
               required
               style={inputStyle}
             />
           </div>
 
-          {/* Identifier Field - Apartment, Membership, Subscription, etc. */}
-          {showIdentifier && (
+          {/* Apartment ID Field - Conditionally shown based on config */}
+          {requireApartmentId && (
             <div style={{ marginBottom: '24px' }}>
               <label style={labelStyle}>
-                {identifierLabel}
+                {getLabel('apartmentIdLabel', 'Apartment ID / House Number')}
               </label>
               <input
                 type="text"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder={identifierPlaceholder}
+                value={apartmentId}
+                onChange={(e) => setApartmentId(e.target.value)}
+                placeholder={getLabel('apartmentPlaceholder', 'e.g., 1, 2, 3...')}
                 required
                 style={inputStyle}
               />

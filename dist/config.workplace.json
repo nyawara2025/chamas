@@ -1,0 +1,86 @@
+{
+  "identity": {
+    "orgId": "acme-welfare",
+    "name": "ACME Welfare Group",
+    "description": "ACME Company Employee Welfare Portal",
+    "logoUrl": "/logos/acme-logo.png",
+    "faviconUrl": "/favicon.ico"
+  },
+  "theme": {
+    "mode": "light",
+    "colors": {
+      "primary": "#3182CE",
+      "secondary": "#63B3ED",
+      "background": "#EBF8FF",
+      "text": "#2D3748",
+      "success": "#38A169",
+      "warning": "#D69E2E",
+      "error": "#E53E3E"
+    },
+    "borderRadius": "rounded-full"
+  },
+  "labels": {
+    "entityName": "Employee",
+    "entityNamePlural": "Employees",
+    "adminName": "Welfare Officer",
+    "adminNamePlural": "Welfare Team",
+    "marketplaceName": "Benefits",
+    "broadcastName": "Updates",
+    "announcementName": "HR Notices",
+    "complaintName": "Support Requests",
+    "paymentName": "Contributions",
+    "welcomeMessage": "Welcome to",
+    "loginPrompt": "Enter your employee details",
+    "noDataMessage": "No records at this time",
+    "loadingMessage": "Loading..."
+  },
+  "features": {
+    "marketplace": true,
+    "payments": true,
+    "complaints": true,
+    "broadcasts": true,
+    "announcements": true,
+    "chat": false,
+    "myInquiries": false,
+    "vacantHouses": false,
+    "shareOpinion": true,
+    "allowGuestAccess": false
+  },
+  "modules": {
+    "auth": {
+      "method": "id_number",
+      "requireApproval": true,
+      "requireApartmentId": false,
+      "roles": ["employee", "supervisor", "hr_admin", "welfare_admin"]
+    },
+    "marketplace": {
+      "name": "Employee Benefits",
+      "categories": ["Insurance", "Loans", "Discounts", "Events"],
+      "allowServices": false,
+      "enableInquiries": true,
+      "enableResponses": true
+    },
+    "broadcasts": {
+      "adminOnly": true,
+      "allowReplies": false,
+      "maxMessageLength": 500
+    },
+    "support": {
+      "contactEmail": "welfare@acme.co.ke",
+      "whatsappNumber": "+254700000000",
+      "hrNumber": "+254700000003"
+    }
+  },
+  "api": {
+    "webhookBaseUrl": "https://n8n.tenear.com/webhook",
+    "headers": {
+      "x-app-version": "1.0.0",
+      "x-org-id": "acme-welfare"
+    }
+  },
+  "navigation": {
+    "showBottomNav": true,
+    "showHeader": true,
+    "menuOrder": ["home", "announcements", "marketplace", "broadcasts", "profile"]
+  }
+}

@@ -34,8 +34,6 @@
     "adminNamePlural": "Church Wardens",
     "marketplaceName": "Church Board",
     "broadcastName": "Sermons",
-    "broadcastSubtitle": "Sunday services, mid-week messages, and more",
-    "broadcastIcon": "🎙️",
     "announcementName": "Notices",
     "complaintName": "Prayer Requests",
     "paymentName": "Tithes & Offerings",
@@ -66,7 +64,7 @@
   "features": {
     "marketplace": true,
     "payments": true,
-    "prayerRequests": true,
+    "complaints": true,
     "broadcasts": true,
     "announcements": true,
     "chat": true,
@@ -76,7 +74,8 @@
     "allowGuestAccess": true,
     "groupManagement": true,
     "events": true,
-    "directory": true
+    "directory": true,
+    "Prayer Requests": true
   },
   "modules": {
     "auth": {
@@ -99,9 +98,7 @@
       "adminOnly": false,
       "allowReplies": true,
       "maxMessageLength": 2000,
-      "categories": ["Sunday Service", "Mid-Week", "Youth", "Women", "Men", "Children"],
-      "recipientOptions": ["all", "cell"],
-      "allowAnonymous": false
+      "categories": ["Sunday Service", "Mid-Week", "Youth", "Women", "Men", "Children"]
     },
     "announcements": {
       "adminOnly": true,
@@ -113,10 +110,7 @@
       "categories": ["Personal", "Family", "Church", "Community"],
       "allowAnonymity": true,
       "requireApproval": false,
-      "shareWithGroup": true,
-      "adminOnly": false,
-      "allowReplies": true,
-      "maxMessageLength": 1000
+      "shareWithGroup": true
     },
     "payments": {
       "name": "Tithes & Offerings",

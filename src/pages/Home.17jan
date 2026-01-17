@@ -69,14 +69,6 @@ const Home = () => {
       icon: '🗣️'
     },
     {
-      feature: 'prayerRequests',
-      label: getLabel('complaintName', 'Prayer Requests'),
-      color: '#FCE7F3',
-      textColor: '#BE185D',
-      route: '/complaints',
-      icon: '🙏'
-    },
-    {
       feature: 'broadcasts',
       label: getLabel('broadcastName', 'Broadcasts'),
       color: '#EDE9FE',
