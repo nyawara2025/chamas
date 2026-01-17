@@ -92,7 +92,7 @@ const BroadcastsList = () => {
     
     // If Sunday Service with specific time selected, filter by service time
     if (filter === 'Sunday Service' && selectedServiceTime) {
-      displayBroadcasts = displayBroadcasts.filter(b => b.serviceTime === selectedServiceTime);
+      displayBroadcasts = displayBroadcasts.filter(b => b.service_time === selectedServiceTime);
     }
     
     return displayBroadcasts;
@@ -100,8 +100,9 @@ const BroadcastsList = () => {
   
   // Handle broadcast click - navigate to ServiceDetail if it has rich content
   const handleBroadcastClick = (broadcast) => {
+    const isRead = Boolean(broadcast.read_status);
     // If it has PDF or YouTube, navigate to detail view
-    if (broadcast.pdfUrl || broadcast.youtubeUrl || (broadcast.category === 'Sunday Service' && broadcast.serviceTime)) {
+    if (broadcast.pdf_url || broadcast.youtube_url || (broadcast.category === 'Sunday Service' && broadcast.service_time)) {
       navigate('/service-detail', {
         state: {
           serviceData: broadcast,
@@ -110,21 +111,22 @@ const BroadcastsList = () => {
       });
     } else {
       // Otherwise just mark as read
-      if (!broadcast.read_status) {
+      if (!isRead) {
         handleMarkAsRead(broadcast.id);
       }
     }
   };
 
   const filteredBroadcasts = broadcasts.filter(b => {
-    if (filter === 'unread') return !b.read_status;
+    const isRead = Boolean(b.read_status);
+    if (filter === 'unread') return !isRead;
     if (filter !== 'all' && config.categories.length > 0) return b.category === filter;
     return true;
   });
   
   // Get broadcasts for a specific service time
   const getBroadcastsForServiceTime = (serviceTime) => {
-    return filteredBroadcasts.filter(b => b.serviceTime === serviceTime);
+    return filteredBroadcasts.filter(b => b.service_time === serviceTime);
   };
   
   // Handle category click - expand Sunday Service to show service times
@@ -421,8 +423,8 @@ const BroadcastsList = () => {
               key={broadcast.id}
               style={{
                 padding: '16px',
-                background: broadcast.read_status ? 'white' : `${config.primaryColor}10`,
-                border: broadcast.read_status ? '1px solid #e5e7eb' : `1px solid ${config.primaryColor}40`,
+                background: Boolean(broadcast.read_status) ? 'white' : `${config.primaryColor}10`,
+                border: Boolean(broadcast.read_status) ? '1px solid #e5e7eb' : `1px solid ${config.primaryColor}40`,
                 borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
@@ -446,16 +448,16 @@ const BroadcastsList = () => {
                       {broadcast.title}
                     </h3>
                     {/* Show media indicators */}
-                    {(broadcast.pdfUrl || broadcast.youtubeUrl) && (
+                    {(broadcast.pdf_url || broadcast.youtube_url) && (
                       <span style={{
                         display: 'flex',
                         gap: '4px'
                       }}>
-                        {broadcast.pdfUrl && <span title="Has PDF">📄</span>}
-                        {broadcast.youtubeUrl && <span title="Has Video">🎥</span>}
+                        {broadcast.pdf_url && <span title="Has PDF">📄</span>}
+                        {broadcast.youtube_url && <span title="Has Video">🎥</span>}
                       </span>
                     )}
-                    {!broadcast.read_status && (
+                    {!Boolean(broadcast.read_status) && (
                       <span style={{
                         width: '8px',
                         height: '8px',
@@ -489,7 +491,7 @@ const BroadcastsList = () => {
                         {broadcast.category}
                       </span>
                     )}
-                    {broadcast.serviceTime && config.sundayServiceTimes && (
+                    {broadcast.service_time && config.sundayServiceTimes && (
                       <span style={{
                         display: 'inline-block',
                         padding: '2px 8px',
@@ -498,7 +500,7 @@ const BroadcastsList = () => {
                         borderRadius: '12px',
                         fontSize: '0.75rem'
                       }}>
-                        {config.sundayServiceTimes.find(t => t.id === broadcast.serviceTime)?.label || broadcast.serviceTime}
+                        {config.sundayServiceTimes.find(t => t.id === broadcast.service_time)?.label || broadcast.service_time}
                       </span>
                     )}
                   </div>
@@ -514,7 +516,7 @@ const BroadcastsList = () => {
                 {broadcast.content}
               </p>
 
-              {broadcast.read_status && broadcast.read_at && (
+              {Boolean(broadcast.read_status) && broadcast.read_at && (
                 <p style={{
                   margin: '12px 0 0',
                   fontSize: '0.75rem',

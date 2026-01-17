@@ -411,11 +411,17 @@ export const createBroadcast = async (broadcastData) => {
     body: JSON.stringify({
       sender_id: parseInt(user.id),
       sender_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
-      sender_role: user.resident_type || user.role || 'user', // Include role for N8N verification
+      sender_role: user.resident_type || user.role || 'user',
       title: broadcastData.title,
       content: broadcastData.content,
+      category: broadcastData.category,
+      speaker: broadcastData.speaker,
+      serviceTime: broadcastData.serviceTime,
+      pdfUrl: broadcastData.pdfUrl,
+      youtubeUrl: broadcastData.youtubeUrl,
       recipient_type: broadcastData.recipientType,
       recipient_value: broadcastData.recipientValue || null,
+      type: broadcastData.type,
     }),
   });
 

@@ -23,22 +23,15 @@ export const getCurrentUser = () => {
 /**
  * Check if the current user is an admin
  * Supports both 'role' and 'resident_type' fields from database
- * Also supports shop-specific roles (shop_admin, shop_staff) and church roles (warden, priest, deacon)
  * @returns {boolean} True if user is admin, false otherwise
  */
 export const isAdmin = () => {
   const user = getCurrentUser();
   if (!user) return false;
   
-  // Define admin roles from different contexts
-  const adminRoles = ['admin', 'shop_admin'];
-  const churchAdminRoles = ['warden', 'priest', 'deacon'];
-  
-  // Check for admin status from various role fields
-  return adminRoles.includes(user.role) || 
-         user.resident_type === 'admin' || 
-         user.isAdmin === true ||
-         churchAdminRoles.includes(user.role);
+  // Check for 'role' or 'resident_type' property set to 'admin'
+  // Also supports 'isAdmin' boolean flag for flexibility
+  return user.role === 'admin' || user.resident_type === 'admin' || user.isAdmin === true;
 };
 
 /**
