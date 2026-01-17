@@ -10,8 +10,6 @@ const BroadcastsList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [userIsAdmin, setUserIsAdmin] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [selectedServiceTime, setSelectedServiceTime] = useState(null);
 
   // Get dynamic values from config
   const getConfig = () => {
@@ -24,7 +22,6 @@ const BroadcastsList = () => {
           categories: window.config.modules?.broadcasts?.categories || [],
           primaryColor: window.config.theme?.colors?.primary || '#0891B2',
           secondaryColor: window.config.theme?.colors?.secondary || '#0E7490',
-          sundayServiceTimes: window.config.modules?.broadcasts?.sundayServiceTimes || [],
         };
       }
     } catch (e) {
@@ -37,7 +34,6 @@ const BroadcastsList = () => {
       categories: [],
       primaryColor: '#0891B2',
       secondaryColor: '#0E7490',
-      sundayServiceTimes: [],
     };
   };
 
@@ -85,75 +81,12 @@ const BroadcastsList = () => {
       minute: '2-digit'
     });
   };
-  
-  // Get the broadcasts to display based on filters
-  const getDisplayBroadcasts = () => {
-    let displayBroadcasts = filteredBroadcasts;
-    
-    // If Sunday Service with specific time selected, filter by service time
-    if (filter === 'Sunday Service' && selectedServiceTime) {
-      displayBroadcasts = displayBroadcasts.filter(b => b.serviceTime === selectedServiceTime);
-    }
-    
-    return displayBroadcasts;
-  };
-  
-  // Handle broadcast click - navigate to ServiceDetail if it has rich content
-  const handleBroadcastClick = (broadcast) => {
-    // If it has PDF or YouTube, navigate to detail view
-    if (broadcast.pdfUrl || broadcast.youtubeUrl || (broadcast.category === 'Sunday Service' && broadcast.serviceTime)) {
-      navigate('/service-detail', {
-        state: {
-          serviceData: broadcast,
-          config: config
-        }
-      });
-    } else {
-      // Otherwise just mark as read
-      if (!broadcast.read_status) {
-        handleMarkAsRead(broadcast.id);
-      }
-    }
-  };
 
   const filteredBroadcasts = broadcasts.filter(b => {
     if (filter === 'unread') return !b.read_status;
     if (filter !== 'all' && config.categories.length > 0) return b.category === filter;
     return true;
   });
-  
-  // Get broadcasts for a specific service time
-  const getBroadcastsForServiceTime = (serviceTime) => {
-    return filteredBroadcasts.filter(b => b.serviceTime === serviceTime);
-  };
-  
-  // Handle category click - expand Sunday Service to show service times
-  const handleCategoryClick = (category) => {
-    if (category === 'Sunday Service') {
-      if (expandedCategory === 'Sunday Service') {
-        setExpandedCategory(null);
-        setFilter('all');
-      } else {
-        setExpandedCategory('Sunday Service');
-        setFilter('Sunday Service');
-      }
-    } else {
-      if (filter === category) {
-        setFilter('all');
-      } else {
-        setFilter(category);
-      }
-    }
-  };
-  
-  // Handle service time selection
-  const handleServiceTimeClick = (serviceTimeId) => {
-    if (selectedServiceTime === serviceTimeId) {
-      setSelectedServiceTime(null);
-    } else {
-      setSelectedServiceTime(serviceTimeId);
-    }
-  };
 
   return (
     <div style={{ padding: '16px' }}>
@@ -255,119 +188,46 @@ const BroadcastsList = () => {
       {config.categories.length > 0 && (
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           gap: '8px',
           marginBottom: '16px',
           overflowX: 'auto',
           paddingBottom: '8px'
         }}>
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
+          <button
+            onClick={() => setFilter('all')}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid',
+              borderColor: filter === 'all' ? config.primaryColor : '#e5e7eb',
+              borderRadius: '16px',
+              background: filter === 'all' ? config.primaryColor : 'white',
+              color: filter === 'all' ? 'white' : '#64748b',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            All
+          </button>
+          {config.categories.map((category) => (
             <button
-              onClick={() => {
-                setFilter('all');
-                setExpandedCategory(null);
-                setSelectedServiceTime(null);
-              }}
+              key={category}
+              onClick={() => setFilter(category)}
               style={{
                 padding: '6px 12px',
                 border: '1px solid',
-                borderColor: filter === 'all' ? config.primaryColor : '#e5e7eb',
+                borderColor: filter === category ? config.primaryColor : '#e5e7eb',
                 borderRadius: '16px',
-                background: filter === 'all' ? config.primaryColor : 'white',
-                color: filter === 'all' ? 'white' : '#64748b',
+                background: filter === category ? config.primaryColor : 'white',
+                color: filter === category ? 'white' : '#64748b',
                 cursor: 'pointer',
                 fontSize: '0.875rem',
                 whiteSpace: 'nowrap'
               }}
             >
-              All
+              {category}
             </button>
-            {config.categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryClick(category)}
-                style={{
-                  padding: '6px 12px',
-                  border: '1px solid',
-                  borderColor: filter === category ? config.primaryColor : '#e5e7eb',
-                  borderRadius: '16px',
-                  background: filter === category ? config.primaryColor : 'white',
-                  color: filter === category ? 'white' : '#64748b',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                {category}
-                {category === 'Sunday Service' && (
-                  <span>{expandedCategory === 'Sunday Service' ? '▲' : '▼'}</span>
-                )}
-              </button>
-            ))}
-          </div>
-          
-          {/* Sunday Service Times Dropdown */}
-          {expandedCategory === 'Sunday Service' && config.sundayServiceTimes.length > 0 && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              padding: '12px',
-              background: '#f3f4f6',
-              borderRadius: '12px',
-              marginTop: '8px'
-            }}>
-              <span style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Select Service Time
-              </span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {config.sundayServiceTimes.map((time) => {
-                  const hasBroadcasts = getBroadcastsForServiceTime(time.id).length > 0;
-                  return (
-                    <button
-                      key={time.id}
-                      onClick={() => handleServiceTimeClick(time.id)}
-                      style={{
-                        padding: '8px 16px',
-                        border: '1px solid',
-                        borderColor: selectedServiceTime === time.id ? config.primaryColor : hasBroadcasts ? config.primaryColor : '#d1d5db',
-                        borderRadius: '8px',
-                        background: selectedServiceTime === time.id ? config.primaryColor : hasBroadcasts ? `${config.primaryColor}15` : 'white',
-                        color: selectedServiceTime === time.id ? 'white' : hasBroadcasts ? config.primaryColor : '#9ca3af',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {time.label}
-                      {hasBroadcasts && (
-                        <span style={{
-                          marginLeft: '6px',
-                          background: selectedServiceTime === time.id ? 'rgba(255,255,255,0.3)' : config.primaryColor,
-                          color: selectedServiceTime === time.id ? 'white' : 'white',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem'
-                        }}>
-                          {getBroadcastsForServiceTime(time.id).length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          ))}
         </div>
       )}
 
@@ -392,7 +252,7 @@ const BroadcastsList = () => {
           }} />
           <p>Loading {config.title.toLowerCase()}...</p>
         </div>
-      ) : getDisplayBroadcasts().length === 0 ? (
+      ) : filteredBroadcasts.length === 0 ? (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -406,17 +266,13 @@ const BroadcastsList = () => {
           <p style={{ margin: 0 }}>
             {filter === 'unread' 
               ? `No unread ${config.title.toLowerCase()}` 
-              : filter === 'Sunday Service' && selectedServiceTime
-                ? `No services found for this time`
-                : filter === 'Sunday Service'
-                  ? 'Select a service time to view details'
-                  : `No ${config.title.toLowerCase()} yet`
+              : `No ${config.title.toLowerCase()} yet`
             }
           </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {getDisplayBroadcasts().map((broadcast) => (
+          {filteredBroadcasts.map((broadcast) => (
             <div
               key={broadcast.id}
               style={{
@@ -427,7 +283,7 @@ const BroadcastsList = () => {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
-              onClick={() => handleBroadcastClick(broadcast)}
+              onClick={() => !broadcast.read_status && handleMarkAsRead(broadcast.id)}
             >
               <div style={{
                 display: 'flex',
@@ -445,16 +301,6 @@ const BroadcastsList = () => {
                     }}>
                       {broadcast.title}
                     </h3>
-                    {/* Show media indicators */}
-                    {(broadcast.pdfUrl || broadcast.youtubeUrl) && (
-                      <span style={{
-                        display: 'flex',
-                        gap: '4px'
-                      }}>
-                        {broadcast.pdfUrl && <span title="Has PDF">📄</span>}
-                        {broadcast.youtubeUrl && <span title="Has Video">🎥</span>}
-                      </span>
-                    )}
                     {!broadcast.read_status && (
                       <span style={{
                         width: '8px',
@@ -475,33 +321,20 @@ const BroadcastsList = () => {
                       : `From: ${broadcast.sender_name} • ${formatDate(broadcast.created_at)}`
                     }
                   </p>
-                  {/* Show category and service time if available */}
-                  <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    {broadcast.category && (
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '2px 8px',
-                        background: `${config.primaryColor}20`,
-                        color: config.primaryColor,
-                        borderRadius: '12px',
-                        fontSize: '0.75rem'
-                      }}>
-                        {broadcast.category}
-                      </span>
-                    )}
-                    {broadcast.serviceTime && config.sundayServiceTimes && (
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '2px 8px',
-                        background: '#fef3c7',
-                        color: '#92400e',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem'
-                      }}>
-                        {config.sundayServiceTimes.find(t => t.id === broadcast.serviceTime)?.label || broadcast.serviceTime}
-                      </span>
-                    )}
-                  </div>
+                  {/* Show category if available */}
+                  {broadcast.category && (
+                    <span style={{
+                      display: 'inline-block',
+                      marginTop: '4px',
+                      padding: '2px 8px',
+                      background: `${config.primaryColor}20`,
+                      color: config.primaryColor,
+                      borderRadius: '12px',
+                      fontSize: '0.75rem'
+                    }}>
+                      {broadcast.category}
+                    </span>
+                  )}
                 </div>
               </div>
 

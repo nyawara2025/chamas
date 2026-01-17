@@ -32,7 +32,7 @@
     "entityNamePlural": "Members",
     "adminName": "Church Warden",
     "adminNamePlural": "Church Wardens",
-    "marketplaceName": "Church Board",
+    "marketplaceName": "Sokoni",
     "broadcastName": "Sermons",
     "broadcastSubtitle": "Sunday services, mid-week messages, and more",
     "broadcastIcon": "🎙️",
@@ -101,7 +101,12 @@
       "maxMessageLength": 2000,
       "categories": ["Sunday Service", "Mid-Week", "Youth", "Women", "Men", "Children"],
       "recipientOptions": ["all", "cell"],
-      "allowAnonymous": false
+      "allowAnonymous": false,
+      "sundayServiceTimes": [
+        { "id": "9am", "label": "First Service - 9:00 AM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" },
+        { "id": "10am", "label": "Second Service - 10:30 AM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" },
+        { "id": "12pm", "label": "Third Service - 12:00 PM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" }
+      ]
     },
     "announcements": {
       "adminOnly": true,

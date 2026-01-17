@@ -9,6 +9,9 @@ const BroadcastAdmin = () => {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
   const [speaker, setSpeaker] = useState('');
+  const [serviceTime, setServiceTime] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [recipientType, setRecipientType] = useState('all');
   const [recipientValue, setRecipientValue] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -35,6 +38,7 @@ const BroadcastAdmin = () => {
           recipientOptions: window.config.modules?.broadcasts?.recipientOptions || ['all'],
           allowAnonymous: window.config.modules?.broadcasts?.allowAnonymous || false,
           maxMessageLength: window.config.modules?.broadcasts?.maxMessageLength || 2000,
+          sundayServiceTimes: window.config.modules?.broadcasts?.sundayServiceTimes || [],
         };
       }
     } catch (e) {
@@ -52,6 +56,7 @@ const BroadcastAdmin = () => {
       recipientOptions: ['all'],
       allowAnonymous: false,
       maxMessageLength: 2000,
+      sundayServiceTimes: [],
     };
   };
 
@@ -93,6 +98,9 @@ const BroadcastAdmin = () => {
         content,
         category: category || null,
         speaker: speaker || null,
+        serviceTime: category === 'Sunday Service' ? serviceTime : null,
+        pdfUrl: category === 'Sunday Service' ? pdfUrl : null,
+        youtubeUrl: category === 'Sunday Service' ? youtubeUrl : null,
         recipientType,
         recipientValue: recipientType === 'all' ? null : recipientValue,
         isAnonymous,
@@ -104,6 +112,9 @@ const BroadcastAdmin = () => {
       setContent('');
       setCategory('');
       setSpeaker('');
+      setServiceTime('');
+      setPdfUrl('');
+      setYoutubeUrl('');
       setRecipientType('all');
       setRecipientValue('');
       setIsAnonymous(false);
@@ -291,6 +302,111 @@ const BroadcastAdmin = () => {
               onFocus={(e) => e.target.style.borderColor = config.primaryColor}
               onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             />
+          </div>
+        )}
+
+        {/* Service Time - For Sunday Service only */}
+        {config.isSermons && category === 'Sunday Service' && (
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
+              Service Time *
+            </label>
+            <select
+              value={serviceTime}
+              onChange={(e) => setServiceTime(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                backgroundColor: 'white',
+                cursor: 'pointer',
+                boxSizing: 'border-box'
+              }}
+            >
+              <option value="">-- Select Service Time --</option>
+              {config.sundayServiceTimes.map((time) => (
+                <option key={time.id} value={time.id}>{time.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* PDF URL - For Sunday Service only */}
+        {config.isSermons && category === 'Sunday Service' && (
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
+              Service Order PDF URL
+            </label>
+            <input
+              type="url"
+              value={pdfUrl}
+              onChange={(e) => setPdfUrl(e.target.value)}
+              placeholder="https://example.com/service-order.pdf"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                outline: 'none'
+              }}
+              onFocus={(e) => e.target.style.borderColor = config.primaryColor}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+              Link to the service order of worship (PDF)
+            </p>
+          </div>
+        )}
+
+        {/* YouTube URL - For Sunday Service only */}
+        {config.isSermons && category === 'Sunday Service' && (
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
+              YouTube Video URL
+            </label>
+            <input
+              type="url"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/watch?v=..."
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '1rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                outline: 'none'
+              }}
+              onFocus={(e) => e.target.style.borderColor = config.primaryColor}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+              Link to the service recording on YouTube
+            </p>
           </div>
         )}
 
