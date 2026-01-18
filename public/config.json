@@ -1,187 +1,142 @@
 {
   "identity": {
-    "orgId": "st-barnabas-anglican-otiende",
-    "shopId": 45,
-    "name": "St. Barnabas Anglican Church, Otiende",
-    "shortName": "St. Barnabas Otiende",
-    "description": "St. Barnabas Anglican Church Otiende - Member Portal",
-    "logoUrl": "/logos/st-barnabas-logo.png",
-    "faviconUrl": "/favicon.ico",
-    "website": "https://stbarnabasotiende.org"
+    "orgId": "carekenya-welfare",
+    "name": "Care Kenya Staff Welfare",
+    "shortName": "Care Welfare",
+    "description": "Staff welfare and mutual support platform",
+    "logoUrl": "/logos/care-kenya.png",
+    "website": "https://carekenya.org"
   },
   "theme": {
     "mode": "light",
     "colors": {
-      "primary": "#553C9A",
-      "secondary": "#6B46C1",
-      "accent": "#9F7AEA",
-      "background": "#FAF5FF",
+      "primary": "#E31C23",
+      "secondary": "#1F2937",
+      "accent": "#059669",
+      "background": "#F3F4F6",
       "surface": "#FFFFFF",
-      "text": "#2D3748",
-      "textLight": "#718096",
-      "success": "#48BB78",
-      "warning": "#ECC94B",
-      "error": "#F56565",
-      "info": "#4299E1"
+      "text": "#1F2937",
+      "textLight": "#6B7280",
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#3B82F6"
     },
     "borderRadius": "rounded-lg",
-    "fontFamily": "Georgia, serif"
+    "fontFamily": "Inter, system-ui, sans-serif"
   },
   "labels": {
     "entityName": "Member",
     "entityNamePlural": "Members",
-    "adminName": "Church Warden",
-    "adminNamePlural": "Church Wardens",
+    "adminName": "Administrator",
+    "adminNamePlural": "Administrators",
     "marketplaceName": "Sokoni",
-    "broadcastName": "Sermons",
-    "broadcastSubtitle": "Sunday services, mid-week messages, and more",
-    "broadcastIcon": "🎙️",
+    "broadcastName": "Announcements",
     "announcementName": "Notices",
-    "complaintName": "Prayer Requests",
-    "paymentName": "Tithes & Offerings",
-    "welcomeMessage": "Welcome to St. Barnabas",
-    "loginPrompt": "Enter your details to access the member portal",
+    "complaintName": "Feedback",
+    "paymentName": "Contributions",
+    "welcomeMessage": "Welcome to Care Kenya Welfare",
+    "loginPrompt": "Enter your phone number to access the member portal",
     "noDataMessage": "No records found",
     "loadingMessage": "Loading...",
     "homeLabel": "Home",
-    "broadcastsLabel": "Sermons",
+    "broadcastsLabel": "Updates",
     "announcementsLabel": "Notices",
-    "marketplaceLabel": "Board",
+    "marketplaceLabel": "Sokoni",
     "profileLabel": "My Profile",
-    "supportLabel": "Support",
-    "signingIn": "Signing in...",
-    "signIn": "Sign In",
-    "footerText": "St. Barnabas Anglican Church, Otiende",
-    "memberIdLabel": "Membership Number",
-    "memberIdPlaceholder": "e.g., MBC-001",
-    "phoneLabel": "Phone Number",
-    "phonePlaceholder": "+254...",
-    "emailLabel": "Email Address",
-    "emailPlaceholder": "your@email.com",
-    "householdLabel": "Household/Family",
-    "householdPlaceholder": "e.g., Otiende Family",
-    "groupLabel": "Cell Group",
-    "groupPlaceholder": "e.g., St. Marys Cell"
+    "supportLabel": "Support"
   },
   "features": {
     "marketplace": true,
     "payments": true,
-    "prayerRequests": true,
+    "complaints": true,
     "broadcasts": true,
     "announcements": true,
     "chat": true,
-    "myInquiries": false,
+    "myInquiries": true,
     "vacantHouses": false,
     "shareOpinion": true,
-    "allowGuestAccess": true,
-    "groupManagement": true,
+    "allowGuestAccess": false,
+    "groupManagement": false,
     "events": true,
-    "directory": true
+    "directory": false,
+    "meetingNotes": true,
+    "finance": true
   },
   "modules": {
     "auth": {
       "method": "phone",
-      "requireApproval": true,
+      "requireApproval": false,
       "requireMemberId": true,
       "requireApartmentId": false,
-      "autoApprove": false,
-      "roles": ["member", "guest", "warden", "priest", "deacon"]
+      "autoApprove": true,
+      "roles": ["member", "admin", "treasurer", "secretary"]
     },
     "marketplace": {
-      "name": "Church Board",
-      "categories": ["Church Supplies", "Events", "Ministries", "Announcements"],
+      "name": "Sokoni",
+      "categories": ["Items", "Services", "Announcements"],
       "allowServices": true,
       "enableInquiries": true,
       "enableResponses": true,
-      "requireAdminApproval": true
+      "requireAdminApproval": false
     },
     "broadcasts": {
       "adminOnly": false,
       "allowReplies": true,
       "maxMessageLength": 2000,
-      "categories": ["Sunday Service", "Mid-Week", "Youth", "Women", "Men", "Children"],
-      "recipientOptions": ["all", "cell"],
-      "allowAnonymous": false,
-      "sundayServiceTimes": [
-        { "id": "9am", "label": "First Service - 9:00 AM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" },
-        { "id": "10am", "label": "Second Service - 10:30 AM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" },
-        { "id": "12pm", "label": "Third Service - 12:00 PM", "defaultPdfUrl": "", "defaultYoutubeUrl": "" }
-      ]
+      "categories": ["General", "Meeting", "Event", "Urgent"]
     },
     "announcements": {
       "adminOnly": true,
       "priorityLevels": ["Normal", "Important", "Urgent"],
       "showExpiry": true
     },
-    "complaints": {
-      "name": "Prayer Requests",
-      "categories": ["Personal", "Family", "Church", "Community"],
-      "allowAnonymity": true,
-      "requireApproval": false,
-      "shareWithGroup": true,
-      "adminOnly": false,
-      "allowReplies": true,
-      "maxMessageLength": 1000
-    },
     "payments": {
-      "name": "Tithes & Offerings",
-      "categories": ["Tithe", "Offering", "Building Fund", "Mission", "Thanksgiving"],
+      "name": "Contributions",
+      "categories": ["Monthly Kitty", "Special Appeal", "Event Fund"],
       "allowOffline": true,
       "receiptEnabled": true,
-      "anonymousAllowed": false
+      "anonymousAllowed": false,
+      "monthlyAmount": 500
     },
-    "groups": {
+    "meetingNotes": {
       "enabled": true,
-      "name": "Cell Groups",
-      "types": ["Cell Group", "Ministry Team", "Bible Study", "Prayer Group"],
-      "allowJoinRequests": true
+      "name": "Meeting Notes",
+      "categories": ["Minutes", "Agendas", "Constitution", "Reports", "Policies"],
+      "allowUpload": true,
+      "requireAdminApproval": true
     },
     "events": {
       "enabled": true,
-      "name": "Church Events",
-      "categories": ["Services", "Camps", "Conferences", "Fellowship", "Outreach"],
-      "requireRegistration": true,
-      "maxAttendees": true
-    },
-    "directory": {
-      "enabled": true,
-      "name": "Member Directory",
-      "privacyLevel": "members",
-      "showContactInfo": false,
-      "allowSearch": true
+      "name": "Events",
+      "categories": ["Meeting", "Social", "Fundraiser", "Workshop"],
+      "requireRegistration": false,
+      "maxAttendees": false
     },
     "support": {
-      "contactEmail": "info@stbarnabasotiende.org",
-      "whatsappNumber": "+254700123456",
-      "churchPhone": "+254700654321",
-      "officeHours": "Mon-Fri: 9AM-5PM, Sat: 9AM-1PM"
+      "contactEmail": "info@carekenya.org",
+      "whatsappNumber": "+254700000000",
+      "officeHours": "Mon-Fri: 9AM-5PM"
     }
   },
   "api": {
     "webhookBaseUrl": "https://n8n.tenear.com/webhook",
     "headers": {
       "x-app-version": "1.0.0",
-      "x-org-id": "st-barnabas-anglican-otiende",
-      "x-shop-id": "45"
+      "x-org-id": "carekenya-welfare"
     }
   },
   "navigation": {
     "showBottomNav": true,
     "showHeader": true,
-    "menuOrder": ["home", "broadcasts", "announcements", "groups", "events", "profile"],
-    "quickActions": ["prayerRequest", "give", "events", "directory"]
+    "menuOrder": ["home", "finance", "meetingNotes", "chat", "broadcasts", "marketplace", "events", "profile"],
+    "quickActions": ["pay", "meetingNotes", "chat"]
   },
   "branding": {
-    "tagline": "Growing in Faith Together",
+    "tagline": "Supporting Each Other",
     "verseOfTheDay": false,
-    "serviceTimes": [
-      {"day": "Sunday", "time": "8:00 AM & 10:30 AM", "name": "Sunday Services"},
-      {"day": "Wednesday", "time": "6:00 PM", "name": "Mid-Week Service"},
-      {"day": "Friday", "time": "6:00 PM", "name": "Youth Service"}
-    ],
     "socialMedia": {
-      "facebook": "https://facebook.com/stbarnabasotiende",
-      "youtube": "https://youtube.com/@stbarnabasotiende"
+      "website": "https://carekenya.org"
     }
   },
   "localization": {

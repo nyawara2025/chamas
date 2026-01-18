@@ -1,23 +1,21 @@
-// API Client Utility for NHC Langata
+// API Client Utility for Care Kenya Welfare App
 // Handles all HTTP requests to n8n webhooks
 
 import { API_ENDPOINTS } from '../config/apiConfig';
 
 // Storage keys
 export const STORAGE_KEYS = {
-  CURRENT_USER: 'nhclangata_current_user',
-  AUTH_TOKEN: 'nhclangata_auth_token',
-  RESIDENT_ID: 'nhclangata_resident_id',
+  CURRENT_USER: 'carekenya_welfare_current_user',
+  AUTH_TOKEN: 'carekenya_welfare_auth_token',
+  USER_ID: 'carekenya_welfare_user_id',
 };
 
 // Get org_id from config
 const getOrgId = () => {
   try {
-    // Try to get from window.config first (set by ConfigContext)
     if (window.config?.identity?.orgId) {
       return window.config.identity.orgId;
     }
-    // Fallback to localStorage config
     const storedConfig = localStorage.getItem('app_config');
     if (storedConfig) {
       const config = JSON.parse(storedConfig);
@@ -31,16 +29,13 @@ const getOrgId = () => {
 
 /**
  * Generic API request handler
- * @param {string} url - The API endpoint URL
- * @param {object} options - Fetch options (method, headers, body, etc.)
- * @returns {Promise<object>} - Parsed JSON response
  */
 export const apiRequest = async (url, options = {}) => {
   const orgId = getOrgId();
   
   const defaultHeaders = {
     'Content-Type': 'application/json',
-    ...(orgId && { 'x-org-id': orgId }),  // Add org_id header for multi-tenancy
+    ...(orgId && { 'x-org-id': orgId }),
   };
 
   const config = {
@@ -51,9 +46,9 @@ export const apiRequest = async (url, options = {}) => {
     },
   };
 
-  // Add timeout for slow connections
+  // Add timeout
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
     const response = await fetch(url, {
@@ -63,23 +58,19 @@ export const apiRequest = async (url, options = {}) => {
 
     clearTimeout(timeoutId);
 
-    // Handle non-200 responses
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `HTTP Error: ${response.status}`);
     }
 
-    // Parse JSON response
     const text = await response.text();
     
-    // Handle empty responses
     if (!text || text.trim() === '') {
       throw new Error('Empty response from server');
     }
     
     try {
-      const data = JSON.parse(text);
-      return data;
+      return JSON.parse(text);
     } catch (parseError) {
       throw new Error(`Invalid JSON response: ${parseError.message}`);
     }
@@ -87,7 +78,6 @@ export const apiRequest = async (url, options = {}) => {
   } catch (error) {
     clearTimeout(timeoutId);
     
-    // Handle specific error types
     if (error.name === 'AbortError') {
       throw new Error('Request timed out. Please try again.');
     }
@@ -102,33 +92,27 @@ export const apiRequest = async (url, options = {}) => {
 
 /**
  * Login user via n8n webhook
- * Simplified: always uses phone as first identifier
- * Second field varies by organization (apartment, membership, subscription, etc.)
- * @param {string} phone - User's phone number
- * @param {string} identifier - Apartment No, Membership No, Subscription No, etc.
- * @returns {Promise<object>} - User data and auth token
  */
-export const loginResident = async (phone, identifier) => {
+export const loginResident = async (phone, memberId) => {
   const response = await apiRequest(API_ENDPOINTS.residentLogin, {
     method: 'POST',
     body: JSON.stringify({ 
       phone, 
-      identifier 
+      identifier: memberId 
     }),
   });
 
-  // Handle array response (N8N might return multiple rows)
+  // Handle array response
   let userResponse = response;
   if (Array.isArray(response) && response.length > 0) {
     userResponse = response[0];
   }
 
-  // Validate response structure
   if (!userResponse || !userResponse.id) {
     throw new Error('Invalid response from server');
   }
 
-  // Handle full_name if first_name/last_name are not available
+  // Handle name fields
   let firstName = userResponse.first_name;
   let lastName = userResponse.last_name;
   
@@ -146,135 +130,31 @@ export const loginResident = async (phone, identifier) => {
     last_name: lastName,
     full_name: userResponse.full_name,
     email: userResponse.email,
-    phone: userResponse.phone || userResponse.admin_whatsapp,
+    phone: userResponse.phone,
     role: userResponse.role,
     org_id: userResponse.org_id,
-    shop_id: userResponse.shop_id,
+    member_id: userResponse.member_id,
   };
 
   localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(userData));
-  localStorage.setItem(STORAGE_KEYS.RESIDENT_ID, userResponse.id);
+  localStorage.setItem(STORAGE_KEYS.USER_ID, userResponse.id);
 
   return { user: userData, token: userResponse.token || 'api_token' };
 };
 
 /**
- * Get vacant houses data
- * @returns {Promise<object>} - Object with total_vacant, vacant_by_phase array, and apartments array
+ * Auth hook for login
  */
-export const getVacantHouses = async () => {
-  const response = await apiRequest(API_ENDPOINTS.getVacantHouses, {
-    method: 'POST',
-    body: JSON.stringify({}),
-  });
-
-  // Validate response structure
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Return the structured data
-  return {
-    total_vacant: response.total_vacant || 0,
-    vacant_by_phase: response.vacant_by_phase || [],
-    apartments: response.apartments || [],
+export const useAuth = () => {
+  const login = async (phone, memberId) => {
+    return await loginResident(phone, memberId);
   };
-};
 
-/**
- * Get payment history and balance for a resident
- * @param {number} residentId - The resident's ID
- * @returns {Promise<object>} - Object with payment history and balance summary
- */
-export const getPaymentHistory = async (residentId) => {
-  const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
-    method: 'POST',
-    body: JSON.stringify({ resident_id: residentId }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  return {
-    resident_id: response.resident_id,
-    resident_name: response.resident_name,
-    house_number: response.house_number,
-    phase: response.phase,
-    monthly_rate: response.monthly_rate || 200,
-    months_count: response.months_count || 0,
-    total_dues: response.total_dues || 0,
-    total_paid: response.total_paid || 0,
-    outstanding_balance: response.outstanding_balance || 0,
-    payment_history: response.payment_history || [],
-  };
-};
-
-/**
- * Trigger M-Pesa STK Push for payment
- * @param {number} residentId - The resident's ID
- * @param {string} phoneNumber - M-Pesa phone number
- * @param {number} amount - Payment amount (Kshs)
- * @returns {Promise<object>} - Response with checkout request ID
- */
-export const initiateSTKPush = async (residentId, phoneNumber, amount) => {
-  const response = await apiRequest(API_ENDPOINTS.initiateSTKPush, {
-    method: 'POST',
-    body: JSON.stringify({
-      resident_id: residentId,
-      phone_number: phoneNumber,
-      amount: amount,
-    }),
-  });
-
-  return response;
-};
-
-/**
- * Check payment status by checkout request ID
- * @param {string} checkoutRequestId - The checkout request ID from STK push
- * @returns {Promise<object>} - Payment status object
- */
-export const checkPaymentStatus = async (checkoutRequestId) => {
-  const response = await apiRequest(API_ENDPOINTS.checkPaymentStatus, {
-    method: 'POST',
-    body: JSON.stringify({ checkout_request_id: checkoutRequestId }),
-  });
-
-  return response;
-};
-
-/**
- * Record a manual payment (fallback option)
- * @param {number} residentId - The resident's ID
- * @param {number} amount - Payment amount (Kshs)
- * @param {string} transactionCode - M-Pesa transaction code
- * @returns {Promise<object>} - Response with success status
- */
-export const recordPayment = async (residentId, amount, transactionCode) => {
-  const response = await apiRequest(API_ENDPOINTS.recordPayment, {
-    method: 'POST',
-    body: JSON.stringify({
-      resident_id: residentId,
-      amount: amount,
-      transaction_code: transactionCode,
-    }),
-  });
-
-  return response;
-};
-
-/**
- * Get the stored resident ID
- * @returns {string|null} - Resident ID or null
- */
-export const getStoredResidentId = () => {
-  return localStorage.getItem(STORAGE_KEYS.RESIDENT_ID);
+  return { login };
 };
 
 /**
  * Get the stored current user
- * @returns {object|null} - User object or null
  */
 export const getStoredUser = () => {
   const userJson = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
@@ -289,54 +169,39 @@ export const getStoredUser = () => {
 };
 
 /**
+ * Get the stored user ID
+ */
+export const getStoredUserId = () => {
+  return localStorage.getItem(STORAGE_KEYS.USER_ID);
+};
+
+/**
  * Clear all auth data (logout)
  */
 export const clearAuthData = () => {
   localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-  localStorage.removeItem(STORAGE_KEYS.RESIDENT_ID);
+  localStorage.removeItem(STORAGE_KEYS.USER_ID);
 };
 
 /**
- * Get active shops for Sokoni (Market Place)
- * @returns {Promise<Array>} - Array of shop objects with id, name, and description
- */
-export const getActiveShops = async () => {
-  const response = await apiRequest(API_ENDPOINTS.getActiveShops, {
-    method: 'POST',
-    body: JSON.stringify({}),
-  });
-
-  // Validate response structure
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Return the shops array, defaulting to empty array if not present
-  return response.shops || response.data || [];
-};
-
-/**
- * Get broadcasts for the logged-in user
- * @returns {Promise<Array>} - Array of broadcast objects
+ * Get broadcasts
  */
 export const getBroadcasts = async () => {
-  const residentId = getStoredResidentId();
-  if (!residentId) {
+  const userId = getStoredUserId();
+  if (!userId) {
     throw new Error('User not logged in');
   }
 
   const response = await apiRequest(API_ENDPOINTS.getBroadcasts, {
     method: 'POST',
-    body: JSON.stringify({ resident_id: parseInt(residentId) }),
+    body: JSON.stringify({ user_id: parseInt(userId) }),
   });
 
-  // Validate response structure
   if (!response || typeof response !== 'object') {
     throw new Error('Invalid response from server');
   }
 
-  // Handle different response formats
   if (Array.isArray(response)) {
     return response;
   }
@@ -349,24 +214,16 @@ export const getBroadcasts = async () => {
     return response.data;
   }
 
-  console.warn('Unexpected broadcasts format:', response);
   return [];
 };
 
 /**
- * Get count of unread broadcasts for the user
- * @returns {Promise<number>} - Count of unread broadcasts
+ * Get count of unread broadcasts
  */
 export const getUnreadBroadcastsCount = async () => {
-  const residentId = getStoredResidentId();
-  if (!residentId) {
-    return 0;
-  }
-
   try {
     const broadcasts = await getBroadcasts();
-    const unreadCount = broadcasts.filter(b => !b.read_status).length;
-    return unreadCount;
+    return broadcasts.filter(b => !b.read_status).length;
   } catch (error) {
     console.error('Error getting unread broadcasts count:', error);
     return 0;
@@ -375,12 +232,10 @@ export const getUnreadBroadcastsCount = async () => {
 
 /**
  * Mark a broadcast as read
- * @param {number} broadcastId - The broadcast ID to mark as read
- * @returns {Promise<object>} - Response from server
  */
 export const markBroadcastRead = async (broadcastId) => {
-  const residentId = getStoredResidentId();
-  if (!residentId) {
+  const userId = getStoredUserId();
+  if (!userId) {
     throw new Error('User not logged in');
   }
 
@@ -388,7 +243,7 @@ export const markBroadcastRead = async (broadcastId) => {
     method: 'POST',
     body: JSON.stringify({
       broadcast_id: broadcastId,
-      resident_id: parseInt(residentId),
+      user_id: parseInt(userId),
     }),
   });
 
@@ -396,33 +251,112 @@ export const markBroadcastRead = async (broadcastId) => {
 };
 
 /**
- * Create a new broadcast (admin only)
- * @param {object} broadcastData - The broadcast data
- * @returns {Promise<object>} - Response from server
+ * Get active shops for Sokoni marketplace
  */
-export const createBroadcast = async (broadcastData) => {
-  const user = getStoredUser();
-  if (!user) {
+export const getActiveShops = async () => {
+  const response = await apiRequest(API_ENDPOINTS.getActiveShops, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  return response.shops || response.data || [];
+};
+
+// =====================
+// Marketplace Inquiry Functions (Sokoni)
+// =====================
+
+/**
+ * Get customer conversations/inquiries from Sokoni marketplace
+ * These are responses from shop owners to product inquiries
+ */
+export const getCustomerConversations = async () => {
+  const userId = getStoredUserId();
+  if (!userId) {
     throw new Error('User not logged in');
   }
 
-  const response = await apiRequest(API_ENDPOINTS.createBroadcast, {
+  const response = await apiRequest(API_ENDPOINTS.getCustomerConversations, {
+    method: 'POST',
+    body: JSON.stringify({ user_id: parseInt(userId) }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.conversations && Array.isArray(response.conversations)) {
+    return response.conversations;
+  }
+  
+  if (response.inquiries && Array.isArray(response.inquiries)) {
+    return response.inquiries;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  return [];
+};
+
+/**
+ * Get inquiry responses for a specific conversation
+ */
+export const getInquiryResponses = async (conversationId) => {
+  const response = await apiRequest(API_ENDPOINTS.getInquiryResponses, {
+    method: 'POST',
+    body: JSON.stringify({ conversation_id: conversationId }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.responses && Array.isArray(response.responses)) {
+    return response.responses;
+  }
+  
+  if (response.messages && Array.isArray(response.messages)) {
+    return response.messages;
+  }
+
+  return [];
+};
+
+// =====================
+// MPESA Payment Functions
+// =====================
+
+/**
+ * Initiate M-PESA STK Push payment
+ */
+export const initiateSTKPush = async (phoneNumber, amount, accountReference) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.initiatePayment, {
     method: 'POST',
     body: JSON.stringify({
-      sender_id: parseInt(user.id),
-      sender_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
-      sender_role: user.resident_type || user.role || 'user',
-      org_id: user.org_id,
-      title: broadcastData.title,
-      content: broadcastData.content,
-      category: broadcastData.category,
-      speaker: broadcastData.speaker,
-      serviceTime: broadcastData.serviceTime,
-      pdfUrl: broadcastData.pdfUrl,
-      youtubeUrl: broadcastData.youtubeUrl,
-      recipient_type: broadcastData.recipientType,
-      recipient_value: broadcastData.recipientValue || null,
-      type: broadcastData.type,
+      user_id: parseInt(userId),
+      phone: phoneNumber,
+      amount: amount,
+      account_reference: accountReference,
+      description: 'Care Kenya Welfare Contribution'
     }),
   });
 
@@ -430,8 +364,217 @@ export const createBroadcast = async (broadcastData) => {
 };
 
 /**
- * Get all phases for filtering (admin only)
- * @returns {Promise<Array>} - Array of phase objects
+ * Check payment status after STK push
+ */
+export const checkPaymentStatus = async (checkoutRequestId) => {
+  const response = await apiRequest(API_ENDPOINTS.checkPaymentStatus, {
+    method: 'POST',
+    body: JSON.stringify({
+      checkout_request_id: checkoutRequestId
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Record a payment manually (offline or confirmed)
+ */
+export const recordPayment = async (paymentData) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.recordPayment, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: parseInt(userId),
+      amount: paymentData.amount,
+      payment_method: paymentData.paymentMethod || 'offline',
+      payment_date: new Date().toISOString(),
+      reference: paymentData.reference,
+      notes: paymentData.notes || ''
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Get payment history for user
+ */
+export const getPaymentHistory = async () => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  try {
+    const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
+      method: 'POST',
+      body: JSON.stringify({ user_id: parseInt(userId) }),
+    });
+
+    if (!response || typeof response !== 'object') {
+      throw new Error('Invalid response from server');
+    }
+
+    if (Array.isArray(response)) {
+      return response;
+    }
+    
+    if (response.payments && Array.isArray(response.payments)) {
+      return response.payments;
+    }
+    
+    if (response.history && Array.isArray(response.history)) {
+      return response.history;
+    }
+    
+    if (response.data && Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error fetching payment history:', error);
+    // Return empty array on error - don't break the app
+    return [];
+  }
+};
+
+// =====================
+// Meeting Notes Functions
+// =====================
+
+/**
+ * Get meeting notes/documents
+ */
+export const getMeetingNotes = async (category = null) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const payload = { user_id: parseInt(userId) };
+  if (category && category !== 'All') {
+    payload.category = category;
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.getMeetingNotes, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.notes && Array.isArray(response.notes)) {
+    return response.notes;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  return [];
+};
+
+// =====================
+// Welfare Support Functions
+// =====================
+
+/**
+ * Get welfare support requests
+ */
+export const getSupportRequests = async () => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.getSupportRequests, {
+    method: 'POST',
+    body: JSON.stringify({ user_id: parseInt(userId) }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.support_requests && Array.isArray(response.support_requests)) {
+    return response.support_requests;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  return [];
+};
+
+/**
+ * Create a welfare support request
+ */
+export const createSupportRequest = async (supportData) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.createSupportRequest, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: parseInt(userId),
+      support_type: supportData.supportType,
+      title: supportData.title,
+      description: supportData.description,
+      requested_amount: supportData.requestedAmount,
+      urgency_level: supportData.urgencyLevel || 'normal'
+    }),
+  });
+
+  return response;
+};
+
+/**
+ * Make a donation to a support request
+ */
+export const makeDonation = async (supportId, amount, message = '') => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.makeDonation, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: parseInt(userId),
+      support_id: supportId,
+      amount: amount,
+      message: message
+    }),
+  });
+
+  return response;
+};
+
+// =====================
+// Broadcast Admin Functions
+// =====================
+
+/**
+ * Get phases for admin broadcast targeting
  */
 export const getPhases = async () => {
   const response = await apiRequest(API_ENDPOINTS.getPhases, {
@@ -440,134 +583,163 @@ export const getPhases = async () => {
   });
 
   if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
+    return [];
   }
 
-  return response.phases || response.data || [];
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  if (response.phases && Array.isArray(response.phases)) {
+    return response.phases;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  return [];
 };
 
 /**
- * Get all blocks for filtering (admin only)
- * @returns {Promise<Array>} - Array of block objects
+ * Get blocks for admin broadcast targeting
  */
-export const getBlocks = async () => {
+export const getBlocks = async (phaseId = null) => {
+  const payload = {};
+  if (phaseId) {
+    payload.phase_id = phaseId;
+  }
+
   const response = await apiRequest(API_ENDPOINTS.getBlocks, {
     method: 'POST',
-    body: JSON.stringify({}),
+    body: JSON.stringify(payload),
   });
 
   if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
+    return [];
   }
 
-  return response.blocks || response.data || [];
-};
-
-/**
- * Get responses for a specific inquiry (customer view)
- * @param {string} inquiryId - The inquiry ID to get responses for
- * @returns {Promise<Array>} - Array of response objects
- */
-export const getInquiryResponses = async (inquiryId) => {
-  if (!inquiryId) {
-    throw new Error('Inquiry ID is required');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.getInquiryResponses, {
-    method: 'POST',
-    body: JSON.stringify({ inquiry_id: inquiryId }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Handle different response formats
   if (Array.isArray(response)) {
     return response;
   }
-
-  if (response.responses && Array.isArray(response.responses)) {
-    return response.responses;
+  
+  if (response.blocks && Array.isArray(response.blocks)) {
+    return response.blocks;
+  }
+  
+  if (response.data && Array.isArray(response.data)) {
+    return response.data;
   }
 
-  return response.data || [];
+  return [];
 };
 
 /**
- * Get all customer conversations (inquiries with responses)
- * Used in customer app to show their conversation history
- * @returns {Promise<Array>} - Array of conversation objects
+ * Create a broadcast/update
  */
-export const getCustomerConversations = async () => {
-  const sessionId = localStorage.getItem('nhc_session_id');
-  if (!sessionId) {
-    throw new Error('Session ID not found. Please visit a shop first.');
+export const createBroadcast = async (broadcastData) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
   }
 
-  const response = await apiRequest(API_ENDPOINTS.getCustomerConversations, {
-    method: 'POST',
-    body: JSON.stringify({ session_id: sessionId }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  // Handle different response formats
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (response.conversations && Array.isArray(response.conversations)) {
-    return response.conversations;
-  }
-
-  return response.data || [];
-};
-
-/**
- * Mark a response as read by the customer
- * @param {number} responseId - The response ID to mark as read
- * @returns {Promise<object>} - Response from server
- */
-export const markResponseRead = async (responseId) => {
-  const sessionId = localStorage.getItem('nhc_session_id');
-  if (!sessionId) {
-    throw new Error('Session ID not found');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.markResponseRead, {
+  const response = await apiRequest(API_ENDPOINTS.createBroadcast, {
     method: 'POST',
     body: JSON.stringify({
-      response_id: responseId,
-      session_id: sessionId,
+      user_id: parseInt(userId),
+      title: broadcastData.title,
+      content: broadcastData.content,
+      category: broadcastData.category || 'General',
+      priority: broadcastData.priority || 'Normal',
+      target_type: broadcastData.targetType || 'all',
+      target_phase: broadcastData.targetPhase || null,
+      target_block: broadcastData.targetBlock || null,
+      expiry_date: broadcastData.expiryDate || null
     }),
   });
 
   return response;
 };
 
+// =====================
+// Profile Functions
+// =====================
+
+/**
+ * Get user profile
+ */
+export const getProfile = async () => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.getProfile, {
+    method: 'POST',
+    body: JSON.stringify({ user_id: parseInt(userId) }),
+  });
+
+  return response;
+};
+
+/**
+ * Update user profile
+ */
+export const updateProfile = async (profileData) => {
+  const userId = getStoredUserId();
+  if (!userId) {
+    throw new Error('User not logged in');
+  }
+
+  const response = await apiRequest(API_ENDPOINTS.updateProfile, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: parseInt(userId),
+      ...profileData
+    }),
+  });
+
+  return response;
+};
+
+// =====================
+// Utility Functions
+// =====================
+
+/**
+ * Get vacant houses (placeholder for this app)
+ */
+export const getVacantHouses = async () => {
+  return { total_vacant: 0, vacant_by_phase: [], apartments: [] };
+};
+
+// Default export with all functions
 export default {
   apiRequest,
   loginResident,
+  useAuth,
+  getStoredUser,
+  getStoredUserId,
+  clearAuthData,
+  getBroadcasts,
+  getUnreadBroadcastsCount,
+  markBroadcastRead,
+  getActiveShops,
+  getCustomerConversations,
+  getInquiryResponses,
   getVacantHouses,
   getPaymentHistory,
   initiateSTKPush,
   checkPaymentStatus,
   recordPayment,
-  getStoredResidentId,
-  getStoredUser,
-  clearAuthData,
-  getActiveShops,
-  getBroadcasts,
-  getUnreadBroadcastsCount,
-  markBroadcastRead,
-  createBroadcast,
+  getMeetingNotes,
+  getSupportRequests,
+  createSupportRequest,
+  makeDonation,
+  getProfile,
+  updateProfile,
   getPhases,
   getBlocks,
-  getInquiryResponses,
-  getCustomerConversations,
-  markResponseRead,
+  createBroadcast,
   STORAGE_KEYS,
 };

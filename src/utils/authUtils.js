@@ -1,71 +1,84 @@
-/**
- * Authentication Utilities
- * Provides helper functions for user authentication and role-based access control
- */
-
-import { STORAGE_KEYS } from './apiClient';
+// Authentication Utilities for Care Kenya Welfare App
 
 /**
- * Get the currently stored user from localStorage
- * @returns {object|null} User object or null if not logged in
- */
-export const getCurrentUser = () => {
-  try {
-    const userJson = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-    if (!userJson) return null;
-    return JSON.parse(userJson);
-  } catch (e) {
-    console.error('Error parsing stored user:', e);
-    return null;
-  }
-};
-
-/**
- * Check if the current user is an admin
- * Supports both 'role' and 'resident_type' fields from database
- * Also supports shop-specific roles (shop_admin, shop_staff) and church roles (warden, priest, deacon)
- * @returns {boolean} True if user is admin, false otherwise
+ * Check if user is admin
  */
 export const isAdmin = () => {
-  const user = getCurrentUser();
+  const user = localStorage.getItem('carekenya_welfare_current_user');
   if (!user) return false;
   
-  // Define admin roles from different contexts
-  const adminRoles = ['admin', 'shop_admin'];
-  const churchAdminRoles = ['warden', 'priest', 'deacon'];
-  
-  // Check for admin status from various role fields
-  return adminRoles.includes(user.role) || 
-         user.resident_type === 'admin' || 
-         user.isAdmin === true ||
-         churchAdminRoles.includes(user.role);
-};
-
-/**
- * Check if user is authenticated (logged in)
- * @returns {boolean} True if authenticated, false otherwise
- */
-export const isAuthenticated = () => {
-  return getCurrentUser() !== null;
-};
-
-/**
- * Get user display name
- * @returns {string} User's full name or email
- */
-export const getUserDisplayName = () => {
-  const user = getCurrentUser();
-  if (!user) return 'Guest';
-  
-  if (user.first_name && user.last_name) {
-    return `${user.first_name} ${user.last_name}`;
+  try {
+    const userData = JSON.parse(user);
+    return userData.role === 'admin' || userData.role === 'treasurer' || userData.role === 'secretary';
+  } catch (e) {
+    return false;
   }
-  return user.email || 'User';
+};
+
+/**
+ * Check if user is treasurer
+ */
+export const isTreasurer = () => {
+  const user = localStorage.getItem('carekenya_welfare_current_user');
+  if (!user) return false;
+  
+  try {
+    const userData = JSON.parse(user);
+    return userData.role === 'treasurer';
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Check if user is secretary
+ */
+export const isSecretary = () => {
+  const user = localStorage.getItem('carekenya_welfare_current_user');
+  if (!user) return false;
+  
+  try {
+    const userData = JSON.parse(user);
+    return userData.role === 'secretary';
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Check if user can create broadcasts
+ */
+export const canCreateBroadcast = () => {
+  return isAdmin() || isSecretary();
+};
+
+/**
+ * Check if user can manage finances
+ */
+export const canManageFinances = () => {
+  return isAdmin() || isTreasurer();
+};
+
+/**
+ * Get user role
+ */
+export const getUserRole = () => {
+  const user = localStorage.getItem('carekenya_welfare_current_user');
+  if (!user) return null;
+  
+  try {
+    const userData = JSON.parse(user);
+    return userData.role || 'member';
+  } catch (e) {
+    return 'member';
+  }
 };
 
 export default {
-  getCurrentUser,
   isAdmin,
-  isAuthenticated,
-  getUserDisplayName,
+  isTreasurer,
+  isSecretary,
+  canCreateBroadcast,
+  canManageFinances,
+  getUserRole,
 };

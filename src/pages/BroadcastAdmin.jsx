@@ -1,203 +1,175 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBroadcast, getPhases, getBlocks, getStoredUser } from '../utils/apiClient';
-import { isAdmin } from '../utils/authUtils';
+import { createBroadcast, getStoredUser } from '../utils/apiClient';
+import { isAdmin, isSecretary } from '../utils/authUtils';
 
 const BroadcastAdmin = () => {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
-  const [speaker, setSpeaker] = useState('');
-  const [serviceTime, setServiceTime] = useState('');
-  const [pdfUrl, setPdfUrl] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [recipientType, setRecipientType] = useState('all');
-  const [recipientValue, setRecipientValue] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [phases, setPhases] = useState([]);
-  const [blocks, setBlocks] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
-
-  // Get dynamic values from config
-  const getConfig = () => {
-    try {
-      if (window.config) {
-        return {
-          pageTitle: window.config.labels?.broadcastName || 'Broadcasts',
-          pageSubtitle: window.config.labels?.broadcastSubtitle || 'Messages',
-          icon: window.config.labels?.broadcastIcon || '📢',
-          categories: window.config.modules?.broadcasts?.categories || [],
-          isSermons: window.config.labels?.broadcastName === 'Sermons',
-          isPrayerRequests: window.config.labels?.complaintName === 'Prayer Requests',
-          primaryColor: window.config.theme?.colors?.primary || '#0891B2',
-          secondaryColor: window.config.theme?.colors?.secondary || '#0E7490',
-          recipientOptions: window.config.modules?.broadcasts?.recipientOptions || ['all'],
-          allowAnonymous: window.config.modules?.broadcasts?.allowAnonymous || false,
-          maxMessageLength: window.config.modules?.broadcasts?.maxMessageLength || 2000,
-          sundayServiceTimes: window.config.modules?.broadcasts?.sundayServiceTimes || [],
-        };
-      }
-    } catch (e) {
-      console.warn('Could not load config:', e);
-    }
-    return {
-      pageTitle: 'Broadcasts',
-      pageSubtitle: 'Messages',
-      icon: '📢',
-      categories: [],
-      isSermons: false,
-      isPrayerRequests: false,
-      primaryColor: '#0891B2',
-      secondaryColor: '#0E7490',
-      recipientOptions: ['all'],
-      allowAnonymous: false,
-      maxMessageLength: 2000,
-      sundayServiceTimes: [],
-    };
-  };
-
-  const config = getConfig();
-  const gradient = `linear-gradient(135deg, ${config.primaryColor} 0%, ${config.secondaryColor} 100%)`;
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: 'General',
+    priority: 'Normal',
+    targetType: 'all'
+  });
+  const [errors, setErrors] = useState({});
+  const contentRef = useRef(null);
 
   useEffect(() => {
-    const user = getStoredUser();
-    if (!user || !isAdmin()) {
-      navigate('/broadcasts');
-      return;
+    // Get current user
+    const userData = localStorage.getItem('carekenya_welfare_current_user');
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        setUser(parsed);
+        
+        // Check permissions
+        if (!isAdmin() && !isSecretary()) {
+          navigate('/');
+        }
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    } else {
+      navigate('/login');
     }
-
-    loadFilters();
   }, [navigate]);
 
-  const loadFilters = async () => {
-    try {
-      const [phasesData, blocksData] = await Promise.all([
-        getPhases(),
-        getBlocks()
-      ]);
-      setPhases(phasesData || []);
-      setBlocks(blocksData || []);
-    } catch (err) {
-      console.error('Error loading filters:', err);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when field is modified
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
     }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required';
+    }
+    if (!formData.content.trim()) {
+      newErrors.content = 'Content is required';
+    }
+    if (formData.content.length > 2000) {
+      newErrors.content = 'Content must be 2000 characters or less';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setIsSubmitting(true);
+    
+    if (!validate()) {
+      return;
+    }
+
+    setLoading(true);
+    setSuccess(false);
 
     try {
-      await createBroadcast({
-        title,
-        content,
-        category: category || null,
-        speaker: speaker || null,
-        serviceTime: category === 'Sunday Service' ? serviceTime : null,
-        pdfUrl: category === 'Sunday Service' ? pdfUrl : null,
-        youtubeUrl: category === 'Sunday Service' ? youtubeUrl : null,
-        recipientType,
-        recipientValue: recipientType === 'all' ? null : recipientValue,
-        isAnonymous,
-        type: config.isSermons ? 'sermon' : config.isPrayerRequests ? 'prayer_request' : 'broadcast'
-      });
-
-      setSuccess(`${config.pageTitle} sent successfully!`);
-      setTitle('');
-      setContent('');
-      setCategory('');
-      setSpeaker('');
-      setServiceTime('');
-      setPdfUrl('');
-      setYoutubeUrl('');
-      setRecipientType('all');
-      setRecipientValue('');
-      setIsAnonymous(false);
-
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.message || `Failed to send ${config.pageTitle.toLowerCase()}`);
+      const result = await createBroadcast(formData);
+      
+      if (result && (result.success !== false)) {
+        setSuccess(true);
+        // Reset form
+        setFormData({
+          title: '',
+          content: '',
+          category: 'General',
+          priority: 'Normal',
+          targetType: 'all'
+        });
+        
+        // Scroll to top to show success message
+        window.scrollTo(0, 0);
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      } else {
+        setErrors({ submit: result?.message || 'Failed to create broadcast' });
+      }
+    } catch (error) {
+      console.error('Error creating broadcast:', error);
+      setErrors({ submit: error.message || 'An error occurred. Please try again.' });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const getRecipientLabel = () => {
-    if (config.isPrayerRequests) {
-      return 'Share with';
-    }
-    switch (recipientType) {
-      case 'all':
-        return config.isSermons ? 'Congregation' : 'All Residents';
-      case 'phase':
-        return 'Select Phase';
-      case 'block':
-        return 'Select Block';
-      case 'cell':
-        return 'Select Cell Group';
-      default:
-        return '';
-    }
-  };
+  const charCount = formData.content.length;
+  const maxChars = 2000;
 
   return (
-    <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ padding: '16px', paddingBottom: '80px' }}>
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <button
           onClick={() => navigate(-1)}
           style={{
             background: 'none',
             border: 'none',
-            color: config.primaryColor,
+            color: '#E31C23',
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: '0.875rem',
             marginBottom: '12px',
-            padding: 0
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}
         >
           ← Back
         </button>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1e293b' }}>
-          {config.icon} {config.isPrayerRequests ? '🙏 New Prayer Request' : `Create ${config.pageTitle}`}
+        <h1 style={{ 
+          margin: 0, 
+          fontSize: '1.5rem', 
+          fontWeight: 700,
+          color: '#1F2937'
+        }}>
+          📢 Create Update
         </h1>
-        <p style={{ margin: '4px 0 0', color: '#64748b' }}>
-          {config.isPrayerRequests 
-            ? 'Share prayer requests with the church' 
-            : `Send ${config.pageTitle.toLowerCase()} to ${config.isSermons ? 'congregation' : 'residents'}`
-          }
+        <p style={{ 
+          margin: '4px 0 0', 
+          color: '#6B7280',
+          fontSize: '0.875rem'
+        }}>
+          Share news with all staff members
         </p>
       </div>
 
-      {/* Success/Error Messages */}
+      {/* Success Message */}
       {success && (
         <div style={{
-          padding: '12px 16px',
           background: '#d1fae5',
-          border: '1px solid #10b981',
-          borderRadius: '8px',
-          color: '#065f46',
-          marginBottom: '16px'
+          border: '1px solid #10B981',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '20px',
+          color: '#065f46'
         }}>
-          {success}
+          <strong>✓ Success!</strong> Your update has been published to all staff.
         </div>
       )}
 
-      {error && (
+      {/* Error Message */}
+      {errors.submit && (
         <div style={{
-          padding: '12px 16px',
           background: '#fee2e2',
-          border: '1px solid #ef4444',
-          borderRadius: '8px',
-          color: '#991b1b',
-          marginBottom: '16px'
+          border: '1px solid #EF4444',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '20px',
+          color: '#991b1b'
         }}>
-          {error}
+          <strong>Error:</strong> {errors.submit}
         </div>
       )}
 
@@ -207,430 +179,225 @@ const BroadcastAdmin = () => {
         <div style={{ marginBottom: '16px' }}>
           <label style={{
             display: 'block',
-            fontSize: '0.875rem',
+            marginBottom: '8px',
             fontWeight: 500,
             color: '#374151',
-            marginBottom: '8px'
+            fontSize: '0.9rem'
           }}>
-            {config.isPrayerRequests ? 'Prayer Request Title' : 'Title'} *
+            Title *
           </label>
           <input
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={config.isSermons 
-              ? "e.g., Sunday Sermon - Walking in Faith" 
-              : config.isPrayerRequests
-                ? "e.g., Pray for my family's health"
-                : "e.g., Important Notice - Water Maintenance"
-            }
-            required
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Enter update title..."
             style={{
               width: '100%',
-              padding: '12px 16px',
+              padding: '12px 14px',
+              border: errors.title ? '2px solid #EF4444' : '1px solid #d1d5db',
+              borderRadius: '10px',
               fontSize: '1rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
               boxSizing: 'border-box',
-              outline: 'none'
+              outline: 'none',
+              transition: 'border-color 0.2s'
             }}
-            onFocus={(e) => e.target.style.borderColor = config.primaryColor}
-            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
           />
+          {errors.title && (
+            <p style={{ color: '#EF4444', fontSize: '0.8rem', marginTop: '4px' }}>
+              {errors.title}
+            </p>
+          )}
         </div>
 
-        {/* Category - For Sermons and Prayer Requests */}
-        {config.categories.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              {config.isSermons ? 'Service Type' : config.isPrayerRequests ? 'Category' : 'Category'}
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">-- Select --</option>
-              {config.categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Speaker - For Sermons only */}
-        {config.isSermons && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Speaker/Pastor
-            </label>
-            <input
-              type="text"
-              value={speaker}
-              onChange={(e) => setSpeaker(e.target.value)}
-              placeholder="e.g., Rev. John Ochieng"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = config.primaryColor}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-          </div>
-        )}
-
-        {/* Service Time - For Sunday Service only */}
-        {config.isSermons && category === 'Sunday Service' && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Service Time *
-            </label>
-            <select
-              value={serviceTime}
-              onChange={(e) => setServiceTime(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">-- Select Service Time --</option>
-              {config.sundayServiceTimes.map((time) => (
-                <option key={time.id} value={time.id}>{time.label}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* PDF URL - For Sunday Service only */}
-        {config.isSermons && category === 'Sunday Service' && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Service Order PDF URL
-            </label>
-            <input
-              type="url"
-              value={pdfUrl}
-              onChange={(e) => setPdfUrl(e.target.value)}
-              placeholder="https://example.com/service-order.pdf"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = config.primaryColor}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
-              Link to the service order of worship (PDF)
-            </p>
-          </div>
-        )}
-
-        {/* YouTube URL - For Sunday Service only */}
-        {config.isSermons && category === 'Sunday Service' && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              YouTube Video URL
-            </label>
-            <input
-              type="url"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                boxSizing: 'border-box',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.target.style.borderColor = config.primaryColor}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
-            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
-              Link to the service recording on YouTube
-            </p>
-          </div>
-        )}
-
-        {/* Recipient Type */}
-        {!config.isPrayerRequests && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              {getRecipientLabel()} *
-            </label>
-            <select
-              value={recipientType}
-              onChange={(e) => {
-                setRecipientType(e.target.value);
-                setRecipientValue('');
-              }}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                boxSizing: 'border-box'
-              }}
-            >
-              {config.recipientOptions.includes('all') && (
-                <option value="all">{config.isSermons ? 'All Congregants' : 'All Residents'}</option>
-              )}
-              {config.recipientOptions.includes('phase') && (
-                <option value="phase">By Phase</option>
-              )}
-              {config.recipientOptions.includes('block') && (
-                <option value="block">By Block</option>
-              )}
-              {config.recipientOptions.includes('cell') && (
-                <option value="cell">By Cell Group</option>
-              )}
-            </select>
-          </div>
-        )}
-
-        {/* Prayer Requests specific: Share with option */}
-        {config.isPrayerRequests && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Share with *
-            </label>
-            <select
-              value={recipientType}
-              onChange={(e) => setRecipientType(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="all">Entire Church</option>
-              <option value="cell">My Cell Group Only</option>
-              <option value="wardens">Church Wardens Only</option>
-              <option value="priest">Priest/Pastor Only</option>
-            </select>
-          </div>
-        )}
-
-        {/* Recipient Value (Phase/Block/Cell) */}
-        {!config.isPrayerRequests && recipientType !== 'all' && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              {getRecipientLabel()} *
-            </label>
-            <select
-              value={recipientValue}
-              onChange={(e) => setRecipientValue(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                fontSize: '1rem',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                boxSizing: 'border-box'
-              }}
-            >
-              <option value="">-- Select --</option>
-              {recipientType === 'phase' && phases.map(phase => (
-                <option key={phase.id} value={phase.id}>
-                  {phase.phase_name}
-                </option>
-              ))}
-              {recipientType === 'block' && blocks.map(block => (
-                <option key={block.id} value={block.block_name}>
-                  {block.block_name}
-                </option>
-              ))}
-              {recipientType === 'cell' && (
-                <>
-                  <option value="st-marys">St. Mary's Cell</option>
-                  <option value="st-peters">St. Peter's Cell</option>
-                  <option value="youth">Youth Fellowship</option>
-                  <option value="women">Women's Ministry</option>
-                  <option value="men">Men's Ministry</option>
-                </>
-              )}
-            </select>
-          </div>
-        )}
-
-        {/* Anonymous option - For Prayer Requests */}
-        {config.allowAnonymous && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              color: '#374151'
-            }}>
-              <input
-                type="checkbox"
-                checked={isAnonymous}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-                style={{ width: '18px', height: '18px' }}
-              />
-              <span>Submit anonymously</span>
-            </label>
-            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
-              Your name will not be shown with this prayer request
-            </p>
-          </div>
-        )}
-
-        {/* Message Content */}
-        <div style={{ marginBottom: '24px' }}>
+        {/* Category */}
+        <div style={{ marginBottom: '16px' }}>
           <label style={{
             display: 'block',
-            fontSize: '0.875rem',
+            marginBottom: '8px',
             fontWeight: 500,
             color: '#374151',
-            marginBottom: '8px'
+            fontSize: '0.9rem'
           }}>
-            {config.isPrayerRequests ? 'Prayer Request Details' : 'Message'} *
+            Category
           </label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={config.isSermons 
-              ? "Write or paste the sermon message here..."
-              : config.isPrayerRequests
-                ? "Share the details of your prayer request..."
-                : "Type your message here..."
-            }
-            required
-            rows={6}
-            maxLength={config.maxMessageLength}
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
             style={{
               width: '100%',
-              padding: '12px 16px',
+              padding: '12px 14px',
+              border: '1px solid #d1d5db',
+              borderRadius: '10px',
               fontSize: '1rem',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
+              boxSizing: 'border-box',
+              outline: 'none',
+              backgroundColor: 'white',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="General">📢 General</option>
+            <option value="Meeting">📅 Meeting</option>
+            <option value="Event">🎉 Event</option>
+            <option value="Urgent">🚨 Urgent</option>
+            <option value="Finance">💰 Finance</option>
+            <option value="Welfare">🤝 Welfare</option>
+          </select>
+        </div>
+
+        {/* Priority */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 500,
+            color: '#374151',
+            fontSize: '0.9rem'
+          }}>
+            Priority
+          </label>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {['Normal', 'Important', 'Urgent'].map((priority) => (
+              <label
+                key={priority}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  border: formData.priority === priority 
+                    ? '2px solid #E31C23' 
+                    : '1px solid #d1d5db',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  backgroundColor: formData.priority === priority ? '#fef2f2' : 'white',
+                  flex: 1,
+                  justifyContent: 'center'
+                }}
+              >
+                <input
+                  type="radio"
+                  name="priority"
+                  value={priority}
+                  checked={formData.priority === priority}
+                  onChange={handleChange}
+                  style={{ display: 'none' }}
+                />
+                <span style={{ 
+                  fontSize: '0.9rem',
+                  color: formData.priority === priority ? '#E31C23' : '#374151',
+                  fontWeight: formData.priority === priority ? 600 : 400
+                }}>
+                  {priority === 'Normal' && '🟢'}
+                  {priority === 'Important' && '🟡'}
+                  {priority === 'Urgent' && '🔴'}
+                  {' '}{priority}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontWeight: 500,
+            color: '#374151',
+            fontSize: '0.9rem'
+          }}>
+            Content *
+          </label>
+          <textarea
+            ref={contentRef}
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            placeholder="Write your update here..."
+            rows={6}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              border: errors.content ? '2px solid #EF4444' : '1px solid #d1d5db',
+              borderRadius: '10px',
+              fontSize: '1rem',
               boxSizing: 'border-box',
               outline: 'none',
               resize: 'vertical',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              lineHeight: '1.5'
             }}
-            onFocus={(e) => e.target.style.borderColor = config.primaryColor}
-            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
           />
-          {content.length > 0 && (
-            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#64748b', textAlign: 'right' }}>
-              {content.length}/{config.maxMessageLength} characters
-            </p>
-          )}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '4px'
+          }}>
+            {errors.content ? (
+              <p style={{ color: '#EF4444', fontSize: '0.8rem' }}>
+                {errors.content}
+              </p>
+            ) : (
+              <span></span>
+            )}
+            <span style={{
+              color: charCount > maxChars * 0.9 ? '#EF4444' : '#6B7280',
+              fontSize: '0.75rem'
+            }}>
+              {charCount}/{maxChars} characters
+            </span>
+          </div>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={loading}
           style={{
             width: '100%',
-            padding: '14px 20px',
-            fontSize: '1rem',
-            fontWeight: 600,
+            padding: '16px',
+            background: loading ? '#9CA3AF' : '#E31C23',
+            color: 'white',
             border: 'none',
             borderRadius: '12px',
-            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-            background: isSubmitting ? '#e5e7eb' : gradient,
-            color: isSubmitting ? '#9ca3af' : 'white',
-            transition: 'all 0.2s ease'
+            fontSize: '1rem',
+            fontWeight: 600,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            marginTop: '8px',
+            transition: 'background-color 0.2s'
           }}
         >
-          {isSubmitting 
-            ? 'Sending...' 
-            : `${config.isPrayerRequests ? '🙏' : config.icon} ${isSubmitting ? 'Sending...' : `Send ${config.pageTitle}`}`
-          }
+          {loading ? (
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <span style={{
+                width: '18px',
+                height: '18px',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderTopColor: 'white',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+              Publishing...
+            </span>
+          ) : (
+            '📢 Publish to All Staff'
+          )}
         </button>
       </form>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+          border-color: #E31C23 !important;
+          box-shadow: 0 0 0 3px rgba(227, 28, 35, 0.1);
+        }
+      `}</style>
     </div>
   );
 };
