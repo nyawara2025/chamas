@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../utils/apiClient';
+import { ConfigContext } from '../App';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const config = useContext(ConfigContext);
   
   const [phone, setPhone] = useState('');
   const [memberId, setMemberId] = useState('');
@@ -14,37 +16,16 @@ const Login = () => {
 
   const from = location.state?.from?.pathname || '/';
 
-  // Get configuration
-  const getConfig = () => {
-    try {
-      if (window.config) {
-        return {
-          orgName: window.config.identity?.name || 'Care Kenya Welfare',
-          loginPrompt: window.config.labels?.loginPrompt || 'Enter your details to access the portal',
-          phoneLabel: window.config.labels?.phoneLabel || 'Phone Number',
-          memberIdLabel: window.config.labels?.memberIdLabel || 'Member ID',
-          signInButton: window.config.labels?.signIn || 'Sign In',
-          primaryColor: window.config.theme?.colors?.primary || '#E31C23',
-          secondaryColor: window.config.theme?.colors?.secondary || '#1F2937',
-          requireMemberId: window.config.modules?.auth?.requireMemberId || false,
-        };
-      }
-    } catch (e) {
-      console.warn('Could not load config:', e);
-    }
-    return {
-      orgName: 'Care Kenya Welfare',
-      loginPrompt: 'Enter your details to access the portal',
-      phoneLabel: 'Phone Number',
-      memberIdLabel: 'Member ID',
-      signInButton: 'Sign In',
-      primaryColor: '#E31C23',
-      secondaryColor: '#1F2937',
-      requireMemberId: false,
-    };
-  };
-
-  const config = getConfig();
+  // Get config values with fallbacks
+  const orgName = config?.identity?.name || 'Care Kenya Welfare';
+  const loginPrompt = config?.labels?.loginPrompt || 'Enter your details to access the portal';
+  const phoneLabel = config?.labels?.phoneLabel || 'Phone Number';
+  const memberIdLabel = config?.labels?.memberIdLabel || 'Member ID';
+  const signInButton = config?.labels?.signIn || 'Sign In';
+  const signingInText = config?.labels?.signingIn || 'Signing in...';
+  const primaryColor = config?.theme?.colors?.primary || '#E31C23';
+  const secondaryColor = config?.theme?.colors?.secondary || '#1F2937';
+  const requireMemberId = config?.modules?.auth?.requireMemberId || false;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,7 +50,7 @@ const Login = () => {
       justifyContent: 'center',
       alignItems: 'center',
       padding: '20px',
-      background: `linear-gradient(135deg, ${config.primaryColor} 0%, ${config.secondaryColor} 100%)`
+      background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`
     }}>
       <div style={{
         background: 'white',
@@ -83,7 +64,7 @@ const Login = () => {
           <div style={{
             width: '72px',
             height: '72px',
-            background: `linear-gradient(135deg, ${config.primaryColor} 0%, ${config.secondaryColor} 100%)`,
+            background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
@@ -94,10 +75,10 @@ const Login = () => {
             🤝
           </div>
           <h1 style={{ margin: '0 0 8px', fontSize: '1.5rem', color: '#1F2937' }}>
-            {config.orgName}
+            {orgName}
           </h1>
           <p style={{ margin: 0, color: '#6B7280', fontSize: '0.9rem' }}>
-            {config.loginPrompt}
+            {loginPrompt}
           </p>
         </div>
 
@@ -124,7 +105,7 @@ const Login = () => {
               fontWeight: 500,
               color: '#374151'
             }}>
-              {config.phoneLabel}
+              {phoneLabel}
             </label>
             <input
               type="tel"
@@ -145,7 +126,7 @@ const Login = () => {
             />
           </div>
 
-          {config.requireMemberId && (
+          {requireMemberId && (
             <div style={{ marginBottom: '24px' }}>
               <label style={{
                 display: 'block',
@@ -154,7 +135,7 @@ const Login = () => {
                 fontWeight: 500,
                 color: '#374151'
               }}>
-                {config.memberIdLabel}
+                {memberIdLabel}
               </label>
               <input
                 type="text"
@@ -182,7 +163,7 @@ const Login = () => {
             style={{
               width: '100%',
               padding: '16px',
-              background: config.primaryColor,
+              background: primaryColor,
               border: 'none',
               borderRadius: '12px',
               color: 'white',
@@ -203,10 +184,10 @@ const Login = () => {
                   borderRadius: '50%',
                   animation: 'spin 1s linear infinite'
                 }} />
-                {window.config?.labels?.signingIn || 'Signing in...'}
+                {signingInText}
               </span>
             ) : (
-              config.signInButton
+              signInButton
             )}
           </button>
         </form>
@@ -219,7 +200,7 @@ const Login = () => {
         textAlign: 'center',
         maxWidth: '400px'
       }}>
-        {config.orgName}<br />
+        {orgName}<br />
         Staff Welfare & Mutual Support Platform
       </p>
 
@@ -228,7 +209,7 @@ const Login = () => {
           to { transform: rotate(360deg); }
         }
         input:focus {
-          border-color: ${config.primaryColor} !important;
+          border-color: ${primaryColor} !important;
         }
       `}</style>
     </div>
