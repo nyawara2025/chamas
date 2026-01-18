@@ -412,7 +412,6 @@ export const createBroadcast = async (broadcastData) => {
       sender_id: parseInt(user.id),
       sender_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
       sender_role: user.resident_type || user.role || 'user',
-      org_id: user.org_id,
       title: broadcastData.title,
       content: broadcastData.content,
       category: broadcastData.category,
