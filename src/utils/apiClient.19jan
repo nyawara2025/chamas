@@ -570,44 +570,6 @@ export const makeDonation = async (supportId, amount, message = '') => {
 };
 
 // =====================
-// Chat Functions
-// =====================
-
-/**
- * Get chat messages for the current user
- * Includes internal chat and WhatsApp messages
- */
-export const getChatMessages = async () => {
-  const userId = getStoredUserId();
-  if (!userId) {
-    throw new Error('User not logged in');
-  }
-
-  const response = await apiRequest(API_ENDPOINTS.getChatHistory, {
-    method: 'POST',
-    body: JSON.stringify({ user_id: parseInt(userId) }),
-  });
-
-  if (!response || typeof response !== 'object') {
-    throw new Error('Invalid response from server');
-  }
-
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (response.messages && Array.isArray(response.messages)) {
-    return response.messages;
-  }
-
-  if (response.data && Array.isArray(response.data)) {
-    return response.data;
-  }
-
-  return [];
-};
-
-// =====================
 // Broadcast Admin Functions
 // =====================
 
@@ -779,6 +741,5 @@ export default {
   getPhases,
   getBlocks,
   createBroadcast,
-  getChatMessages,
   STORAGE_KEYS,
 };
