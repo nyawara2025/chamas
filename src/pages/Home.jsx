@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredUser, getBroadcasts, getUnreadBroadcastsCount } from '../utils/apiClient';
+import { ConfigContext } from '../App';
 
 const Home = () => {
   const navigate = useNavigate();
   const user = getStoredUser();
+  const config = useContext(ConfigContext);
+  
   const [stats, setStats] = useState({
     balance: 3500,
     contributions: 500,
@@ -15,41 +18,27 @@ const Home = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Get configuration
-  const getConfig = () => {
-    try {
-      if (window.config) {
-        return {
-          title: window.config.identity?.name || 'Care Kenya Welfare',
-          shortName: window.config.identity?.shortName || 'Care Welfare',
-          primaryColor: window.config.theme?.colors?.primary || '#E31C23',
-          secondaryColor: window.config.theme?.colors?.secondary || '#1F2937',
-          paymentName: window.config.labels?.paymentName || 'Contributions',
-          broadcastsLabel: window.config.labels?.broadcastsLabel || 'Updates',
-          monthlyAmount: window.config.modules?.payments?.monthlyAmount || 500,
-          currency: window.config.localization?.currency || 'KES',
-          quickActions: window.config.navigation?.quickActions || [],
-          features: window.config.features || {},
-        };
-      }
-    } catch (e) {
-      console.warn('Could not load config:', e);
-    }
-    return {
-      title: 'Care Kenya Welfare',
-      shortName: 'Care Welfare',
-      primaryColor: '#E31C23',
-      secondaryColor: '#1F2937',
-      paymentName: 'Contributions',
-      broadcastsLabel: 'Updates',
-      monthlyAmount: 500,
-      currency: 'KES',
-      quickActions: [],
-      features: {},
-    };
-  };
-
-  const config = getConfig();
+  // Get config values with fallbacks
+  const title = config?.identity?.name || 'Care Kenya Welfare';
+  const shortName = config?.identity?.shortName || 'Care Welfare';
+  const primaryColor = config?.theme?.colors?.primary || '#E31C23';
+  const secondaryColor = config?.theme?.colors?.secondary || '#1F2937';
+  const paymentName = config?.labels?.paymentName || 'Contributions';
+  const broadcastsLabel = config?.labels?.broadcastsLabel || 'Updates';
+  const marketplaceLabel = config?.labels?.marketplaceLabel || 'Sokoni';
+  const welcomeMessage = config?.labels?.welcomeMessage || `Welcome to ${title}`;
+  const tagline = config?.branding?.tagline || 'Supporting Each Other';
+  const currency = config?.localization?.currency || 'KES';
+  const monthlyAmount = config?.modules?.payments?.monthlyAmount || 500;
+  
+  // Features
+  const features = config?.features || {};
+  const hasFinance = features.finance !== false;
+  const hasMeetingNotes = features.meetingNotes !== false;
+  const hasBroadcasts = features.broadcasts !== false;
+  const hasAnnouncements = features.announcements !== false;
+  const hasMarketplace = features.marketplace !== false;
+  const hasEvents = features.events !== false;
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,7 +66,7 @@ const Home = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    return `${config.currency} ${parseFloat(amount || 0).toLocaleString()}`;
+    return `${currency} ${parseFloat(amount || 0).toLocaleString()}`;
   };
 
   const formatDate = (dateString) => {
@@ -92,17 +81,17 @@ const Home = () => {
   const getQuickActions = () => {
     const actions = [];
     
-    if (config.features?.finance) {
+    if (hasFinance) {
       actions.push({
         id: 'pay',
         label: 'Pay Contribution',
         icon: '💰',
-        color: config.primaryColor,
+        color: primaryColor,
         route: '/finance'
       });
     }
 
-    if (config.features?.meetingNotes) {
+    if (hasMeetingNotes) {
       actions.push({
         id: 'meetingNotes',
         label: 'Meeting Notes',
@@ -112,10 +101,10 @@ const Home = () => {
       });
     }
 
-    if (config.features?.broadcasts) {
+    if (hasBroadcasts) {
       actions.push({
         id: 'broadcasts',
-        label: config.broadcastsLabel,
+        label: broadcastsLabel,
         icon: '📢',
         color: '#8B5CF6',
         route: '/broadcasts',
@@ -123,7 +112,7 @@ const Home = () => {
       });
     }
 
-    if (config.features?.announcements) {
+    if (hasAnnouncements) {
       actions.push({
         id: 'notices',
         label: 'Notices',
@@ -133,10 +122,10 @@ const Home = () => {
       });
     }
 
-    if (config.features?.marketplace) {
+    if (hasMarketplace) {
       actions.push({
         id: 'sokoni',
-        label: config.labels?.marketplaceName || 'Sokoni',
+        label: marketplaceLabel,
         icon: '🛒',
         color: '#10B981',
         route: '/sokoni'
@@ -160,7 +149,7 @@ const Home = () => {
           width: '40px',
           height: '40px',
           border: '3px solid #e5e7eb',
-          borderTopColor: config.primaryColor,
+          borderTopColor: primaryColor,
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
@@ -188,7 +177,7 @@ const Home = () => {
           color: '#6B7280',
           fontSize: '0.9rem'
         }}>
-          {config.welcomeMessage || `Welcome to ${config.title}`}
+          {welcomeMessage}
         </p>
       </div>
 
@@ -200,15 +189,15 @@ const Home = () => {
         marginBottom: '24px'
       }}>
         <div 
-          onClick={() => config.features?.finance && navigate('/finance')}
+          onClick={() => hasFinance && navigate('/finance')}
           style={{
             background: 'white',
             borderRadius: '16px',
             padding: '16px',
             textAlign: 'center',
             border: '1px solid #e5e7eb',
-            cursor: config.features?.finance ? 'pointer' : 'default',
-            opacity: config.features?.finance ? 1 : 0.6
+            cursor: hasFinance ? 'pointer' : 'default',
+            opacity: hasFinance ? 1 : 0.6
           }}
         >
           <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>💰</div>
@@ -231,15 +220,15 @@ const Home = () => {
         </div>
 
         <div 
-          onClick={() => config.features?.finance && navigate('/finance')}
+          onClick={() => hasFinance && navigate('/finance')}
           style={{
             background: 'white',
             borderRadius: '16px',
             padding: '16px',
             textAlign: 'center',
             border: '1px solid #e5e7eb',
-            cursor: config.features?.finance ? 'pointer' : 'default',
-            opacity: config.features?.finance ? 1 : 0.6
+            cursor: hasFinance ? 'pointer' : 'default',
+            opacity: hasFinance ? 1 : 0.6
           }}
         >
           <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>📅</div>
@@ -255,22 +244,22 @@ const Home = () => {
             margin: 0, 
             fontSize: '1rem', 
             fontWeight: 700,
-            color: config.primaryColor
+            color: primaryColor
           }}>
             {formatCurrency(stats.contributions)}
           </p>
         </div>
 
         <div 
-          onClick={() => config.features?.events && navigate('/events')}
+          onClick={() => hasEvents && navigate('/events')}
           style={{
             background: 'white',
             borderRadius: '16px',
             padding: '16px',
             textAlign: 'center',
             border: '1px solid #e5e7eb',
-            cursor: config.features?.events ? 'pointer' : 'default',
-            opacity: config.features?.events ? 1 : 0.6
+            cursor: hasEvents ? 'pointer' : 'default',
+            opacity: hasEvents ? 1 : 0.6
           }}
         >
           <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>📅</div>
@@ -358,7 +347,7 @@ const Home = () => {
       </div>
 
       {/* Recent Updates */}
-      {config.features?.broadcasts && (
+      {hasBroadcasts && (
         <div style={{
           background: 'white',
           borderRadius: '16px',
@@ -377,14 +366,14 @@ const Home = () => {
               fontWeight: 600,
               color: '#1F2937'
             }}>
-              📢 {config.broadcastsLabel}
+              📢 {broadcastsLabel}
             </h2>
             <button
               onClick={() => navigate('/broadcasts')}
               style={{
                 background: 'none',
                 border: 'none',
-                color: config.primaryColor,
+                color: primaryColor,
                 cursor: 'pointer',
                 fontSize: '0.875rem',
                 fontWeight: 500
@@ -453,10 +442,10 @@ const Home = () => {
         fontSize: '0.75rem'
       }}>
         <p style={{ margin: 0 }}>
-          © 2024 {config.shortName}
+          © 2024 {shortName}
         </p>
         <p style={{ margin: '4px 0 0' }}>
-          {config.branding?.tagline || 'Supporting Each Other'}
+          {tagline}
         </p>
       </div>
     </div>
