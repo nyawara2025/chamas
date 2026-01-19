@@ -250,7 +250,7 @@ const Profile = () => {
         ))}
         
         {/* Admin Link - Chat Dashboard */}
-        {(user?.role === 'shop_admin' || user?.role === 'treasurer' || user?.role === 'secretary') && (
+        {(user?.role === 'admin' || user?.role === 'treasurer' || user?.role === 'secretary') && (
           <div
             onClick={() => navigate('/chat-admin')}
             style={{

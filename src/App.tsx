@@ -12,6 +12,8 @@ import BroadcastAdmin from './pages/BroadcastAdmin';
 import Sokoni from './pages/Sokoni';
 import Opinions from './pages/Opinions';
 import Notices from './pages/Notices';
+import Chat from './pages/Chat';
+import ChatAdmin from './pages/ChatAdmin';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 
@@ -243,7 +245,6 @@ function App() {
 
   return (
     <ConfigContext.Provider value={config}>
-      <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -291,14 +292,21 @@ function App() {
             <Route path="/notices" element={<ProtectedRoute><Notices /></ProtectedRoute>} />
           )}
           
+          {/* Chat Support */}
+          {config?.features?.chat && (
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+          )}
+          
+          {/* Chat Admin Dashboard */}
+          <Route path="/chat-admin" element={<ProtectedRoute><ChatAdmin /></ProtectedRoute>} />
+          
           {/* Profile */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </ConfigContext.Provider>
+      </ConfigContext.Provider>
   );
 }
 

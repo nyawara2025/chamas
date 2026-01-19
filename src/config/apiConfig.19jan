@@ -29,8 +29,6 @@ export const API_ENDPOINTS = {
   // Chat Support
   sendChatMessage: 'https://n8n.tenear.com/webhook/carekenya/chat',
   getChatHistory: 'https://n8n.tenear.com/webhook/carekenya/chat-history',
-  getAdminChatConversations: 'https://n8n.tenear.com/webhook/carekenya/admin-chat-conversations',
-  sendChatReply: 'https://n8n.tenear.com/webhook/carekenya/chat-reply',
   
   // Welfare Support
   getSupportRequests: 'https://n8n.tenear.com/webhook/carekenya/support-requests',

@@ -607,6 +607,45 @@ export const getChatMessages = async () => {
   return [];
 };
 
+/**
+ * Get all chat conversations for admin dashboard
+ */
+export const getAllChatConversations = async (orgId) => {
+  const response = await apiRequest(API_ENDPOINTS.getAllChatConversations, {
+    method: 'POST',
+    body: JSON.stringify({ org_id: orgId }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (response.conversations && Array.isArray(response.conversations)) {
+    return response.conversations;
+  }
+
+  return [];
+};
+
+/**
+ * Send chat reply from admin
+ */
+export const sendChatReply = async (replyData) => {
+  const response = await apiRequest(API_ENDPOINTS.sendChatReply, {
+    method: 'POST',
+    body: JSON.stringify({
+      org_id: replyData.org_id,
+      user_id: replyData.user_id,
+      admin_id: replyData.admin_id,
+      admin_name: replyData.admin_name,
+      message: replyData.message,
+      timestamp: replyData.timestamp
+    }),
+  });
+
+  return response;
+};
+
 // =====================
 // Broadcast Admin Functions
 // =====================
@@ -780,5 +819,7 @@ export default {
   getBlocks,
   createBroadcast,
   getChatMessages,
+  getAllChatConversations,
+  sendChatReply,
   STORAGE_KEYS,
 };

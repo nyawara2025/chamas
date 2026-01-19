@@ -66,10 +66,10 @@
   "modules": {
     "auth": {
       "method": "phone",
-      "requireApproval": false,
+      "requireApproval": true,
       "requireMemberId": true,
       "requireApartmentId": false,
-      "autoApprove": true,
+      "autoApprove": false,
       "roles": ["member", "admin", "treasurer", "secretary"]
     },
     "marketplace": {
