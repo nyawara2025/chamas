@@ -27,10 +27,11 @@ export const API_ENDPOINTS = {
   getMeetingNotes: 'https://n8n.tenear.com/webhook/carekenya/meeting-notes',
   
   // Chat Support
-  sendChatMessage: 'https://n8n.tenear.com/webhook/carekenya/chat',
-  getChatHistory: 'https://n8n.tenear.com/webhook/carekenya/chat-history',
-  getAdminChatConversations: 'https://n8n.tenear.com/webhook/carekenya/admin-chat-conversations',
-  sendChatReply: 'https://n8n.tenear.com/webhook/carekenya/chat-reply',
+  sendChatMessage: 'https://n8n.tenear.com/webhook/welfare/chat',
+  getChatHistory: 'https://n8n.tenear.com/webhook/welfare/chat-history',
+  getAdminChatConversations: 'https://n8n.tenear.com/webhook/welfare/admin-chat-conversations',
+  getChatMessages: 'https://n8n.tenear.com/webhook/welfare/chat-history',
+  sendChatReply: 'https://n8n.tenear.com/webhook/welfare/chat-reply',
   
   // Welfare Support
   getSupportRequests: 'https://n8n.tenear.com/webhook/carekenya/support-requests',
