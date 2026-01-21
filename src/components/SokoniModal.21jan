@@ -17,11 +17,11 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
 
   // Generate a unique session ID for tracking inquiries
   const generateSessionId = () => {
-    const storedSession = localStorage.getItem('carekenya_session_id');
+    const storedSession = localStorage.getItem('nhc_session_id');
     if (storedSession) return storedSession;
 
     const newSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('carekenya_session_id', newSessionId);
+    localStorage.setItem('nhc_session_id', newSessionId);
     return newSessionId;
   };
 
@@ -133,7 +133,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                 width: '40px',
                 height: '40px',
                 border: '3px solid #e5e7eb',
-                borderTopColor: '#10B981',
+                borderTopColor: '#0891B2',
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite',
                 marginBottom: '16px'
@@ -169,7 +169,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                   cursor: 'pointer',
                   marginBottom: '16px',
                   appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2310B981%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230891B2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'right 16px top 50%',
                   backgroundSize: '12px auto',
@@ -202,7 +202,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#10B981'}
+                  onFocus={(e) => e.target.style.borderColor = '#0891B2'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
                 <span style={{
@@ -241,7 +241,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                   cursor: 'pointer',
                   marginBottom: '16px',
                   appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2310B981%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230891B2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'right 16px top 50%',
                   backgroundSize: '12px auto',
@@ -260,9 +260,9 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
               {selectedShop && (
                 <div style={{
                   padding: '16px',
-                  background: '#f0fdf4',
+                  background: '#f0f9ff',
                   borderRadius: '12px',
-                  border: '1px solid #bbf7d0',
+                  border: '1px solid #bae6fd',
                   marginBottom: '16px'
                 }}>
                   <div style={{
@@ -274,7 +274,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                       width: '48px',
                       height: '48px',
                       borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      background: 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -320,7 +320,7 @@ const SokoniModal = ({ isOpen, onClose, shops }) => {
                   borderRadius: '12px',
                   cursor: selectedShopId && !isLoading ? 'pointer' : 'not-allowed',
                   background: selectedShopId && !isLoading
-                    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                    ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'
                     : '#e5e7eb',
                   color: selectedShopId && !isLoading ? 'white' : '#9ca3af',
                   transition: 'all 0.2s ease',

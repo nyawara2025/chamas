@@ -13,15 +13,15 @@ export const API_ENDPOINTS = {
   getBlocks: 'https://n8n.tenear.com/webhook/carekenya/blocks',
   
   // Marketplace (Sokoni)
-  getActiveShops: 'https://n8n.tenear.com/webhook/carekenya/shops',
+  getActiveShops: 'https://n8n.tenear.com/webhook/nhc-active-shops',
   getCustomerConversations: 'https://n8n.tenear.com/webhook/carekenya/customer-conversations',
   getInquiryResponses: 'https://n8n.tenear.com/webhook/carekenya/inquiry-responses',
   
   // MPESA Payments
-  initiatePayment: 'https://n8n.tenear.com/webhook/carekenya/stk-push',
-  checkPaymentStatus: 'https://n8n.tenear.com/webhook/carekenya/payment-status',
-  recordPayment: 'https://n8n.tenear.com/webhook/carekenya/record-payment',
-  getPaymentHistory: 'https://n8n.tenear.com/webhook/carekenya/payments',
+  initiatePayment: 'https://n8n.tenear.com/webhook/welfare/stk-push',
+  checkPaymentStatus: 'https://n8n.tenear.com/webhook/welfare/payment-status',
+  recordPayment: 'https://n8n.tenear.com/webhook/welfare/record-payment',
+  getPaymentHistory: 'https://n8n.tenear.com/webhook/welfare/payments',
   
   // Meeting Notes
   getMeetingNotes: 'https://n8n.tenear.com/webhook/carekenya/meeting-notes',
