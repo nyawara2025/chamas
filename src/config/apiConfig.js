@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   getBlocks: 'https://n8n.tenear.com/webhook/welfare/blocks',
   
   // Marketplace (Sokoni)
-  getActiveShops: 'https://n8n.tenear.com/webhook/welfare/shops',
+  getActiveShops: 'https://n8n.tenear.com/webhook/nhc-active-shops',
   getCustomerConversations: 'https://n8n.tenear.com/webhook/welfare/customer-conversations',
   getInquiryResponses: 'https://n8n.tenear.com/webhook/welfare/inquiry-responses',
   
