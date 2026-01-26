@@ -10,37 +10,20 @@ export const STORAGE_KEYS = {
   USER_ID: 'carekenya_welfare_user_id',
 };
 
-// Get org_id from config (uses ConfigContext or window.config)
-export let cachedConfig = null;
-
-// Store config when loaded
-export const setConfig = (config) => {
-  console.log('[apiClient] setConfig called with:', config?.identity?.orgId);
-  cachedConfig = config;
-};
-
+// Get org_id from config
 const getOrgId = () => {
   try {
-    console.log('[apiClient] getOrgId called, cachedConfig:', cachedConfig?.identity?.orgId);
-    console.log('[apiClient] window.config:', window.config?.identity?.orgId);
-    
-    // First try cached config (set by App.jsx after loading)
-    if (cachedConfig?.identity?.orgId) {
-      const orgId = parseInt(cachedConfig.identity.orgId, 10);
-      console.log('[apiClient] Returning orgId from cachedConfig:', orgId);
-      if (!isNaN(orgId)) return orgId;
-    }
-    
-    // Fallback to window.config
     if (window.config?.identity?.orgId) {
-      const orgId = parseInt(window.config.identity.orgId, 10);
-      console.log('[apiClient] Returning orgId from window.config:', orgId);
-      if (!isNaN(orgId)) return orgId;
+      return window.config.identity.orgId;
+    }
+    const storedConfig = localStorage.getItem('app_config');
+    if (storedConfig) {
+      const config = JSON.parse(storedConfig);
+      return config?.identity?.orgId;
     }
   } catch (e) {
     console.warn('Could not get org_id:', e);
   }
-  console.log('[apiClient] getOrgId returning null');
   return null;
 };
 
@@ -422,7 +405,6 @@ export const recordPayment = async (paymentData) => {
  * Get payment history for user
  */
 export const getPaymentHistory = async () => {
-  const user = getStoredUser();
   const userId = getStoredUserId();
   if (!userId) {
     throw new Error('User not logged in');
@@ -431,10 +413,7 @@ export const getPaymentHistory = async () => {
   try {
     const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
       method: 'POST',
-      body: JSON.stringify({ 
-        user_id: parseInt(userId),
-        org_id: user?.org_id || parseInt(window.config?.identity?.orgId, 10) || 1
-      }),
+      body: JSON.stringify({ user_id: parseInt(userId) }),
     });
 
     if (!response || typeof response !== 'object') {

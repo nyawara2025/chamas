@@ -9,7 +9,6 @@ import MeetingNotes from './pages/MeetingNotes';
 import Broadcasts from './pages/Broadcasts';
 import BroadcastDetail from './pages/BroadcastDetail';
 import BroadcastAdmin from './pages/BroadcastAdmin';
-import Sokoni from './pages/Sokoni';
 import Opinions from './pages/Opinions';
 import Notices from './pages/Notices';
 import Chat from './pages/Chat';
@@ -275,11 +274,6 @@ function App() {
           {/* Admin: Create Broadcast */}
           {config?.features?.broadcasts && (
             <Route path="/broadcast-admin" element={<ProtectedRoute><BroadcastAdmin /></ProtectedRoute>} />
-          )}
-          
-          {/* Sokoni/Marketplace */}
-          {config?.features?.marketplace && (
-            <Route path="/sokoni" element={<ProtectedRoute><Sokoni /></ProtectedRoute>} />
           )}
           
           {/* Opinions */}

@@ -8,7 +8,7 @@ const Finance = () => {
   const user = getStoredUser();
   
   // State for balance and transactions
-  const [balance, setBalance] = useState({ current: 0, due: 500, paid: 0, totalPaid: 0 });
+  const [balance, setBalance] = useState({ current: 0, due: 0, paid: 0, totalPaid: 0 });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -17,7 +17,7 @@ const Finance = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   
   // Payment form state
-  const [paymentCategory, setPaymentCategory] = useState('Monthly Kitty');
+  const [paymentCategory, setPaymentCategory] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
@@ -29,26 +29,24 @@ const Finance = () => {
     try {
       if (window.config) {
         return {
-          monthlyAmount: window.config.modules?.payments?.monthlyAmount || 500,
-          categories: window.config.modules?.payments?.categories || ['Monthly Kitty', 'Special Appeal', 'Event Fund'],
+          categories: window.config.modules?.payments?.categories || [],
           currency: window.config.localization?.currency || 'KES',
           primaryColor: window.config.theme?.colors?.primary || '#E31C23',
           secondaryColor: window.config.theme?.colors?.secondary || '#1F2937',
-          orgName: window.config.identity?.name || 'Care Kenya Welfare',
-          shortName: window.config.identity?.shortName || 'Care Welfare',
+          orgName: window.config.identity?.name || '',
+          shortName: window.config.identity?.shortName || '',
         };
       }
     } catch (e) {
       console.warn('Could not load config:', e);
     }
     return {
-      monthlyAmount: 500,
-      categories: ['Monthly Kitty', 'Special Appeal', 'Event Fund'],
+      categories: [],
       currency: 'KES',
       primaryColor: '#E31C23',
       secondaryColor: '#1F2937',
-      orgName: 'Care Kenya Welfare',
-      shortName: 'Care Welfare',
+      orgName: '',
+      shortName: '',
     };
   };
 
@@ -92,7 +90,7 @@ const Finance = () => {
 
         setBalance({
           current: totalPaid,
-          due: Math.max(0, config.monthlyAmount - thisMonthPaid),
+          due: 0,  // Monthly due amount should come from payment_categories table
           paid: thisMonthPaid,
           totalPaid: totalPaid
         });
@@ -100,25 +98,19 @@ const Finance = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error loading finance data:', err);
-        // Fallback to mock data on error
+        // Don't show fake data - show empty state
         setBalance({
-          current: 3500,
-          due: 500,
-          paid: 500,
-          totalPaid: 3500
+          current: 0,
+          due: 0,
+          paid: 0,
+          totalPaid: 0
         });
-        setTransactions([
-          { id: 1, type: 'in', amount: 500, description: 'January 2025 Contribution', date: '2025-01-15', reference: 'MJX12345', status: 'completed' },
-          { id: 2, type: 'in', amount: 500, description: 'December 2024 Contribution', date: '2024-12-20', reference: 'MJX12344', status: 'completed' },
-          { id: 3, type: 'in', amount: 500, description: 'November 2024 Contribution', date: '2024-11-18', reference: 'MJX12343', status: 'completed' },
-          { id: 4, type: 'out', amount: 5000, description: 'Bereavement payout', date: '2024-11-10', reference: 'N/A', status: 'completed' },
-          { id: 5, type: 'in', amount: 500, description: 'October 2024 Contribution', date: '2024-10-22', reference: 'MJX12342', status: 'completed' },
-        ]);
+        setTransactions([]);
         setLoading(false);
       }
     };
     loadData();
-  }, [config.monthlyAmount]);
+  }, []);
 
   // Set default phone number from user profile
   useEffect(() => {
@@ -135,11 +127,8 @@ const Finance = () => {
   // Handle category change - auto set amount
   const handleCategoryChange = (category) => {
     setPaymentCategory(category);
-    if (category === 'Monthly Kitty') {
-      setPaymentAmount(config.monthlyAmount.toString());
-    } else {
-      setPaymentAmount('');
-    }
+    // Amount should come from payment_categories API, not config
+    setPaymentAmount('');
   };
 
   // Format phone number for M-PESA
@@ -318,7 +307,8 @@ const Finance = () => {
   };
 
   // Calculate monthly progress
-  const progressPercent = Math.min(100, (balance.paid / config.monthlyAmount) * 100);
+  const monthlyAmount = 0; // Should come from payment_categories API
+  const progressPercent = monthlyAmount > 0 ? Math.min(100, (balance.paid / monthlyAmount) * 100) : 0;
 
   // Open receipt modal
   const openReceipt = (transaction) => {
@@ -450,8 +440,8 @@ const Finance = () => {
               marginBottom: '8px',
               fontSize: '0.875rem'
             }}>
-              <span>Monthly Progress ({config.monthlyAmount})</span>
-              <span>{formatCurrency(balance.paid)} / {formatCurrency(config.monthlyAmount)}</span>
+              <span>Monthly Progress</span>
+              <span>{formatCurrency(balance.paid)}</span>
             </div>
             <div style={{
               width: '100%',
@@ -478,13 +468,13 @@ const Finance = () => {
             flexWrap: 'wrap'
           }}>
             <span style={{
-              background: balance.paid >= config.monthlyAmount ? '#10B981' : '#F59E0B',
+              background: monthlyAmount > 0 && balance.paid >= monthlyAmount ? '#10B981' : '#F59E0B',
               padding: '6px 14px',
               borderRadius: '20px',
               fontSize: '0.8rem',
               fontWeight: 600
             }}>
-              {balance.paid >= config.monthlyAmount ? '✅ Up to Date' : `⚠️ ${formatCurrency(balance.due)} Due`}
+              {balance.totalPaid > 0 ? '✅ View History' : 'No contributions yet'}
             </span>
             {balance.totalPaid > 0 && (
               <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
@@ -505,7 +495,7 @@ const Finance = () => {
         <button
           onClick={() => {
             setPaymentCategory('Monthly Kitty');
-            setPaymentAmount(config.monthlyAmount.toString());
+            setPaymentAmount('');
             setPaymentStatus('idle');
             setStatusMessage('');
             setShowPaymentModal(true);
