@@ -1,11 +1,11 @@
 {
   "identity": {
     "orgId": 1,
-    "name": "Care Kenya Alumni",
-    "shortName": "Care Alumni",
-    "description": "Staff welfare and mutual support platform",
-    "logoUrl": "/logos/care-kenya.png",
-    "website": "https://carekenya.org"
+    "name": "NHC Women Group",
+    "shortName": "NHC Women Group",
+    "description": "Women Self Help for NHC Court Langata",
+    "logoUrl": "/logos/nhc.png",
+    "website": "https://nhclangata.org"
   },
   "theme": {
     "mode": "light",
@@ -35,7 +35,7 @@
     "announcementName": "Notices",
     "complaintName": "Feedback",
     "paymentName": "Contributions",
-    "welcomeMessage": "Welcome to Care Kenya Welfare",
+    "welcomeMessage": "Welcome to NHC Women Chama",
     "loginPrompt": "Enter your phone number to access the member portal",
     "noDataMessage": "No records found",
     "loadingMessage": "Loading...",
@@ -93,7 +93,7 @@
     },
     "payments": {
       "name": "Contributions",
-      "categories": ["Monthly Kitty", "Special Appeal", "Event Fund"],
+      "categories": ["Monthly Kitty", "Special Appeal", "Table Banking"],
       "allowOffline": true,
       "receiptEnabled": true,
       "anonymousAllowed": false,
@@ -114,7 +114,7 @@
       "maxAttendees": false
     },
     "support": {
-      "contactEmail": "info@carekenya.org",
+      "contactEmail": "info@nhcourtlangata.org",
       "whatsappNumber": "+254700000000",
       "officeHours": "Mon-Fri: 9AM-5PM"
     }
@@ -136,7 +136,7 @@
     "tagline": "Supporting Each Other",
     "verseOfTheDay": false,
     "socialMedia": {
-      "website": "https://carekenya.org"
+      "website": "https://nhclangatacourt.org"
     }
   },
   "localization": {
