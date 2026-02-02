@@ -811,6 +811,60 @@ export const getVacantHouses = async () => {
   return { total_vacant: 0, vacant_by_phase: [], apartments: [] };
 };
 
+// =====================
+// Table Banking Functions
+// =====================
+
+/**
+ * Get personal table banking summary (Soft loan balance, due date, etc.)
+ */
+export const getTableBankingSummary = async () => {
+  const userId = getStoredUserId();
+  if (!userId) throw new Error('User not logged in');
+
+  const response = await apiRequest(API_ENDPOINTS.getTableBankingSummary, {
+    method: 'POST',
+    body: JSON.stringify({ 
+      user_id: parseInt(userId) 
+    }),
+  });
+
+  // Expected structure: { balance: 500, due_date: '2026-03-01', history: [] }
+  return response || { balance: 0, history: [] };
+};
+
+/**
+ * Log a meeting session (Treasurer Only)
+ * Records the total impromptu fundraiser and specific loans disbursed
+ * @param {object} sessionData - { total_fundraised, loans: [{member_id, loan_amount}] }
+ */
+export const logTableBankingSession = async (sessionData) => {
+  const user = getStoredUser();
+  if (user?.role !== 'treasurer' && !user?.is_admin) {
+    throw new Error('Unauthorized: Only the Treasurer can log meeting sessions.');
+  }
+
+  return await apiRequest(API_ENDPOINTS.postTableBankingLoan, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...sessionData,
+      logged_by: user.id
+    }),
+  });
+};
+
+/**
+ * Get full table banking history for the organization
+ */
+export const getTableBankingHistory = async () => {
+  const response = await apiRequest(API_ENDPOINTS.getTableBankingHistory, {
+    method: 'POST',
+    body: JSON.stringify({}), // x-org-id is handled by apiRequest
+  });
+
+  return Array.isArray(response) ? response : (response.data || []);
+};
+
 // Default export with all functions
 export default {
   apiRequest,
@@ -842,5 +896,8 @@ export default {
   getChatMessages,
   getAllChatConversations,
   sendChatReply,
+  getTableBankingSummary,
+  logTableBankingSession,
+  getTableBankingHistory,
   STORAGE_KEYS,
 };

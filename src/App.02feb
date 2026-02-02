@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { getStoredUser, clearAuthData, setConfig } from './utils/apiClient';
+import { getStoredUser, clearAuthData } from './utils/apiClient';
 
 // Page Imports
 import Home from './pages/Home';
@@ -220,22 +220,18 @@ const Logout = () => {
 };
 
 function App() {
-  // 1. Rename the setter to 'setConfigState' to avoid name collision with the import
-  const [config, setConfigState] = useState(null); 
+  const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Load configuration from public folder
     fetch('/config.json')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load config');
         return res.json();
       })
       .then((data) => {
-        // 2. THE CRITICAL ADDITION: This sends org_id to apiClient.js
-        setConfig(data); 
-
-        // 3. Update local state using the new setter name
-        setConfigState(data);
+        setConfig(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -285,8 +281,8 @@ function App() {
             <Route path="/opinions" element={<ProtectedRoute><Opinions /></ProtectedRoute>} />
           )}
           
-          {/* Table Banking - Ensure key matches config.json (tablebanking) */}
-          {(config?.features?.TableBanking || config?.features?.tablebanking) && (
+          {/* Table Banking */}
+          {config?.features?.TableBanking && (
             <Route path="/table-banking" element={<ProtectedRoute><TableBanking /></ProtectedRoute>} />
           )}
           
@@ -304,7 +300,8 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-    </ConfigContext.Provider>
+      </ConfigContext.Provider>
   );
 }
+
 export default App;

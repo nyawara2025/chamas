@@ -39,7 +39,7 @@ const Home = () => {
   const hasFinance = features.finance !== false;
   const hasMeetingNotes = features.meetingNotes !== false;
   const hasBroadcasts = features.broadcasts !== false;
-  const hasTableBanking = features.tablebanking !== false;
+  const hasAnnouncements = features.announcements !== false;
   const hasMarketplace = features.marketplace !== false;
   const hasEvents = features.events !== false;
 
@@ -115,13 +115,13 @@ const Home = () => {
       });
     }
 
-    if (hasTableBanking) {
+    if (hasAnnouncements) {
       actions.push({
-        id: 'tablebanking',
-        label: 'Table Banking',
+        id: 'notices',
+        label: 'Notices',
         icon: '📋',
         color: '#F59E0B',
-        route: '/table-banking'
+        route: '/notices'
       });
     }
 

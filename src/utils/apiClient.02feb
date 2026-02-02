@@ -10,20 +10,37 @@ export const STORAGE_KEYS = {
   USER_ID: 'carekenya_welfare_user_id',
 };
 
-// Get org_id from config
+// Get org_id from config (uses ConfigContext or window.config)
+export let cachedConfig = null;
+
+// Store config when loaded
+export const setConfig = (config) => {
+  console.log('[apiClient] setConfig called with:', config?.identity?.orgId);
+  cachedConfig = config;
+};
+
 const getOrgId = () => {
   try {
-    if (window.config?.identity?.orgId) {
-      return window.config.identity.orgId;
+    console.log('[apiClient] getOrgId called, cachedConfig:', cachedConfig?.identity?.orgId);
+    console.log('[apiClient] window.config:', window.config?.identity?.orgId);
+    
+    // First try cached config (set by App.jsx after loading)
+    if (cachedConfig?.identity?.orgId) {
+      const orgId = parseInt(cachedConfig.identity.orgId, 10);
+      console.log('[apiClient] Returning orgId from cachedConfig:', orgId);
+      if (!isNaN(orgId)) return orgId;
     }
-    const storedConfig = localStorage.getItem('app_config');
-    if (storedConfig) {
-      const config = JSON.parse(storedConfig);
-      return config?.identity?.orgId;
+    
+    // Fallback to window.config
+    if (window.config?.identity?.orgId) {
+      const orgId = parseInt(window.config.identity.orgId, 10);
+      console.log('[apiClient] Returning orgId from window.config:', orgId);
+      if (!isNaN(orgId)) return orgId;
     }
   } catch (e) {
     console.warn('Could not get org_id:', e);
   }
+  console.log('[apiClient] getOrgId returning null');
   return null;
 };
 
@@ -405,6 +422,7 @@ export const recordPayment = async (paymentData) => {
  * Get payment history for user
  */
 export const getPaymentHistory = async () => {
+  const user = getStoredUser();
   const userId = getStoredUserId();
   if (!userId) {
     throw new Error('User not logged in');
@@ -413,7 +431,10 @@ export const getPaymentHistory = async () => {
   try {
     const response = await apiRequest(API_ENDPOINTS.getPaymentHistory, {
       method: 'POST',
-      body: JSON.stringify({ user_id: parseInt(userId) }),
+      body: JSON.stringify({ 
+        user_id: parseInt(userId),
+        org_id: user?.org_id || parseInt(window.config?.identity?.orgId, 10) || 1
+      }),
     });
 
     if (!response || typeof response !== 'object') {
@@ -607,6 +628,45 @@ export const getChatMessages = async () => {
   return [];
 };
 
+/**
+ * Get all chat conversations for admin dashboard
+ */
+export const getAllChatConversations = async (orgId) => {
+  const response = await apiRequest(API_ENDPOINTS.getAllChatConversations, {
+    method: 'POST',
+    body: JSON.stringify({ org_id: orgId }),
+  });
+
+  if (!response || typeof response !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+
+  if (response.conversations && Array.isArray(response.conversations)) {
+    return response.conversations;
+  }
+
+  return [];
+};
+
+/**
+ * Send chat reply from admin
+ */
+export const sendChatReply = async (replyData) => {
+  const response = await apiRequest(API_ENDPOINTS.sendChatReply, {
+    method: 'POST',
+    body: JSON.stringify({
+      org_id: replyData.org_id,
+      user_id: replyData.user_id,
+      admin_id: replyData.admin_id,
+      admin_name: replyData.admin_name,
+      message: replyData.message,
+      timestamp: replyData.timestamp
+    }),
+  });
+
+  return response;
+};
+
 // =====================
 // Broadcast Admin Functions
 // =====================
@@ -780,5 +840,7 @@ export default {
   getBlocks,
   createBroadcast,
   getChatMessages,
+  getAllChatConversations,
+  sendChatReply,
   STORAGE_KEYS,
 };

@@ -43,11 +43,6 @@ export const API_ENDPOINTS = {
   // Profile
   updateProfile: 'https://n8n.tenear.com/webhook/welfare/profile-update',
   getProfile: 'https://n8n.tenear.com/webhook/welfare/profile',
-
-// Table Banking (Replaces Notices)
-  getTableBankingSummary: 'https://n8n.tenear.com/welfare/table-banking-summary',
-  postTableBankingLoan: 'https://n8n.tenear.com/welfare/table-banking-loan',
-  getTableBankingHistory: 'https://n8n.tenear.com/welfare/table-banking-history',
 };
 
 export default API_ENDPOINTS;
