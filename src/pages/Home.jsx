@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredUser, getBroadcasts, getUnreadBroadcastsCount, getActiveShops } from '../utils/apiClient';
+import { getStoredUser, getBroadcasts, getUnreadBroadcastsCount, getActiveShops, getTableBankingSummary } from '../utils/apiClient';
 import { ConfigContext } from '../App';
 import SokoniModal from '../components/SokoniModal';
 
@@ -48,12 +48,25 @@ const Home = () => {
       try {
         // Load broadcasts
         try {
-          const broadcasts = await getBroadcasts();
-          setRecentBroadcasts((broadcasts || []).slice(0, 3));
-          const unread = await getUnreadBroadcastsCount();
-          setUnreadCount(unread);
+          // const broadcasts = await getBroadcasts();
+          // setRecentBroadcasts((broadcasts || []).slice(0, 3));
+          // const unread = await getUnreadBroadcastsCount();
+          // setUnreadCount(unread);
         } catch (e) {
           console.warn('Could not load broadcasts:', e);
+        }
+
+
+        // --- ADD THE TABLE BANKING SUMMARY CALL HERE ---
+        try {
+            const bankingSummary = await getTableBankingSummary();
+            // Assuming setStats is used elsewhere for general stats
+            setStats(prev => ({
+                ...prev,
+                balance: bankingSummary.balance || 0
+            }));
+        } catch (e) {
+            console.warn('Could not load table banking summary:', e);
         }
 
         // Simulate other data loading
