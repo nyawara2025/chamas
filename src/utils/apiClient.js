@@ -17,6 +17,7 @@ export let cachedConfig = null;
 export const setConfig = (config) => {
   console.log('[apiClient] setConfig called with:', config?.identity?.orgId);
   cachedConfig = config;
+  window.config = config;
 };
 
 const getOrgId = () => {
