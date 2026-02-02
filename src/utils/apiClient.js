@@ -1,13 +1,13 @@
-// API Client Utility for Care Kenya Welfare App
+// API Client Utility for Chamas App
 // Handles all HTTP requests to n8n webhooks
 
 import { API_ENDPOINTS } from '../config/apiConfig';
 
 // Storage keys
 export const STORAGE_KEYS = {
-  CURRENT_USER: 'carekenya_welfare_current_user',
-  AUTH_TOKEN: 'carekenya_welfare_auth_token',
-  USER_ID: 'carekenya_welfare_user_id',
+  CURRENT_USER: 'welfare_current_user',
+  AUTH_TOKEN: 'welfare_auth_token',
+  USER_ID: 'welfare_user_id',
 };
 
 // Get org_id from config (uses ConfigContext or window.config)
