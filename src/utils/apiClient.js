@@ -873,12 +873,23 @@ export const logTableBankingSession = async (sessionData) => {
  * Get full table banking history for the organization
  */
 export const getTableBankingHistory = async () => {
-  const response = await apiRequest(API_ENDPOINTS.getTableBankingHistory, {
+  const userId = getStoredUserId();
+  const orgId = getOrgId();
+  
+  const params = new URLSearchParams();
+  params.append('user_id', userId || '');
+  if (orgId) params.append('org_id', orgId);
+
+  const response = await fetch(API_ENDPOINTS.getTableBankingHistory, {
     method: 'POST',
-    body: JSON.stringify({}), // x-org-id is handled by apiRequest
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
   });
 
-  return Array.isArray(response) ? response : (response.data || []);
+  if (!response.ok) return [];
+  
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data.history || []);
 };
 
 // Default export with all functions
