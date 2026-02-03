@@ -508,6 +508,65 @@ export const getMeetingNotes = async (category = null) => {
   return [];
 };
 
+/**
+ * Create a new meeting record (Admin only)
+ */
+export const createMeeting = async (meetingData) => {
+  const orgId = getOrgId();
+  const params = new URLSearchParams();
+  
+  // Flatten the formData object into the URL parameters
+  Object.keys(meetingData).forEach(key => {
+    params.append(key, meetingData[key]);
+  });
+  
+  if (orgId) params.append('org_id', orgId);
+
+  const response = await fetch(API_ENDPOINTS.createMeeting, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save meeting: ${response.status}`);
+  }
+
+  return await response.json();
+};
+
+export const getActiveMembers = async () => {
+  const orgId = getOrgId();
+  const params = new URLSearchParams();
+  if (orgId) params.append('org_id', orgId);
+
+  const response = await fetch(API_ENDPOINTS.getMembers, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  return await response.json();
+};
+
+export const logAttendance = async (meetingId, memberIds) => {
+  const orgId = getOrgId();
+  // We send the list as a JSON string in a form field for simplicity
+  const params = new URLSearchParams();
+  params.append('meeting_id', meetingId);
+  params.append('member_ids', JSON.stringify(memberIds)); 
+  if (orgId) params.append('org_id', orgId);
+
+  const response = await fetch(API_ENDPOINTS.logAttendance, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  return await response.json();
+};
+
+
 // =====================
 // Welfare Support Functions
 // =====================
@@ -895,6 +954,21 @@ export const getTableBankingHistory = async () => {
   return Array.isArray(data) ? data : [];
 };
 
+export const getMeetings = async () => {
+  const orgId = getOrgId();
+  const params = new URLSearchParams();
+  if (orgId) params.append('org_id', orgId);
+
+  const response = await fetch(API_ENDPOINTS.getMeetings, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+
+  if (!response.ok) return [];
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
+};
 
 
 // Default export with all functions
@@ -931,5 +1005,6 @@ export default {
   getTableBankingSummary,
   logTableBankingSession,
   getTableBankingHistory,
+  getMeetings,
   STORAGE_KEYS,
 };

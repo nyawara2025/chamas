@@ -6,8 +6,7 @@ import { getStoredUser, clearAuthData, setConfig } from './utils/apiClient';
 import Home from './pages/Home';
 import Finance from './pages/Finance';
 import MeetingNotes from './pages/MeetingNotes';
-import MeetingAdmin from './pages/MeetingAdmin';
-import AttendanceAdmin from './pages/AttendanceAdmin'; // Added AttendanceAdmin import
+import MeetingAdmin from './pages/MeetingAdmin'; // Imported MeetingAdmin
 import Broadcasts from './pages/Broadcasts';
 import BroadcastDetail from './pages/BroadcastDetail';
 import BroadcastAdmin from './pages/BroadcastAdmin';
@@ -225,6 +224,7 @@ function App() {
   const [config, setConfigState] = useState(null); 
   const [loading, setLoading] = useState(true);
   
+  // Define user at the top level of the function
   const user = getStoredUser();
 
   useEffect(() => {
@@ -270,14 +270,9 @@ function App() {
             </>
           )}
 
-          {/* Meeting Admin */}
+          {/* Meeting Admin - Only for Admins */}
           {config?.features?.meetingNotes && user?.role === 'admin' && (
             <Route path="/meeting-admin" element={<ProtectedRoute><MeetingAdmin /></ProtectedRoute>} />
-          )}
-
-          {/* Attendance Admin - NEW ROUTE */}
-          {config?.features?.meetingNotes && user?.role === 'admin' && (
-            <Route path="/mark-attendance/:meetingId" element={<ProtectedRoute><AttendanceAdmin /></ProtectedRoute>} />
           )}
           
           {/* Table Banking */}
@@ -296,7 +291,10 @@ function App() {
             </>
           )}
 
+          {/* Profile */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </ConfigContext.Provider>

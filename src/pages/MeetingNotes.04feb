@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getMeetings, getStoredUser } from '../utils/apiClient';
+import { getMeetings } from '../utils/apiClient';
 import { ConfigContext } from '../App';
+import { getStoredUser } from '../utils/apiClient'; // Add this import
 
 const MeetingNotes = () => {
-  const navigate = useNavigate();
   const user = getStoredUser();
   const isAdmin = user?.role === 'admin';
   const config = useContext(ConfigContext);
@@ -33,31 +32,7 @@ const MeetingNotes = () => {
 
   return (
     <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '20px' 
-      }}>
-        <h2 style={{ margin: 0, color: '#1F2937' }}>Meeting Notes</h2>
-        {isAdmin && (
-          <button 
-            onClick={() => navigate('/meeting-admin')}
-            style={{ 
-              backgroundColor: primaryColor, 
-              color: 'white', 
-              padding: '8px 16px', 
-              borderRadius: '8px', 
-              border: 'none',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-          >
-            + New Meeting
-          </button>
-        )}
-      </div>
+      <h2 style={{ marginBottom: '20px', color: '#1F2937' }}>Meeting Notes & Minutes</h2>
       
       {meetings.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
@@ -87,33 +62,11 @@ const MeetingNotes = () => {
             <p style={{ margin: '0 0 12px 0', color: '#4b5563', fontSize: '0.9rem', lineHeight: '1.5' }}>
               {meeting.summary || 'No summary provided for this meeting.'}
             </p>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '12px' }}>
-              {meeting.location && (
-                <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
-                  📍 {meeting.location}
-                </div>
-              )}
-              
-              {/* ADMIN ACTION: Mark Attendance */}
-              {isAdmin && (
-                <button 
-                  onClick={() => navigate(`/mark-attendance/${meeting.id}`)}
-                  style={{ 
-                    background: '#f3f4f6', 
-                    color: '#1f2937', 
-                    padding: '6px 12px', 
-                    borderRadius: '6px', 
-                    border: '1px solid #d1d5db',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  👥 Attendance
-                </button>
-              )}
-            </div>
+            {meeting.location && (
+              <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
+                📍 {meeting.location}
+              </div>
+            )}
           </div>
         ))
       )}

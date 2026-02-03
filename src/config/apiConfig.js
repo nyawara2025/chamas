@@ -25,7 +25,12 @@ export const API_ENDPOINTS = {
   getPaymentHistory: 'https://n8n.tenear.com/webhook/welfare/payments-history',
   
   // Meeting Notes
-  getMeetingNotes: 'https://n8n.tenear.com/webhook/welfare/meeting-notes',
+  // getMeetingNotes: 'https://n8n.tenear.com/webhook/welfare/get-meetings',
+  getMeetings: 'https://n8n.tenear.com/webhook/welfare/get-meetings',
+  createMeeting: 'https://n8n.tenear.com/webhook/welfare/create-meeting',
+  getMembers: 'https://n8n.tenear.com/webhook/welfare/get-members',
+  logAttendance: 'https://n8n.tenear.com/webhook/welfare/log-attendance',
+
   
   // Chat Support
   sendChatMessage: 'https://n8n.tenear.com/webhook/welfare/chat',

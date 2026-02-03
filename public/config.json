@@ -53,6 +53,7 @@
     "allowGuestAccess": true,
     "groupManagement": true,
     "events": true,
+    "meetingNotes": true,
     "directory": true
   },
   "modules": {
