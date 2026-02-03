@@ -873,11 +873,11 @@ export const logTableBankingSession = async (sessionData) => {
  * Get full table banking history for the organization
  */
 export const getTableBankingHistory = async () => {
-  const userId = getStoredUserId();
+  const currentUser = getStoredUser();
   const orgId = getOrgId();
   
   const params = new URLSearchParams();
-  params.append('user_id', userId || '');
+  params.append('phone_number', currentUser?.phone || '');
   if (orgId) params.append('org_id', orgId);
 
   const response = await fetch(API_ENDPOINTS.getTableBankingHistory, {
@@ -886,11 +886,16 @@ export const getTableBankingHistory = async () => {
     body: params.toString(),
   });
 
+  // If the server fails, return an empty array so .map() doesn't crash
   if (!response.ok) return [];
-  
+
   const data = await response.json();
-  return Array.isArray(data) ? data : (data.history || []);
+
+  // Return the data directly because n8n is now sending the clean array
+  return Array.isArray(data) ? data : [];
 };
+
+
 
 // Default export with all functions
 export default {

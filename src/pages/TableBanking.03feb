@@ -283,27 +283,44 @@ const TableBanking = () => {
           Recent History
         </h3>
         {history.length > 0 ? (
-  history.map((row, i) => (
-    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
-      <div>
-        <div style={{ fontWeight: '600' }}>{row.description || 'Soft Loan'}</div>
-        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-          {/* Safety check for the date */}
-          {row.date ? new Date(row.date).toLocaleDateString('en-KE') : 'No Date'}
-        </div>
-      </div>
-      <div style={{ textAlign: 'right' }}>
-        {/* Safety check for the amount using || 0 */}
-        <div style={{ fontWeight: '700', color: '#10B981' }}>
-          + KES {Number(row.amount || 0).toLocaleString()}
-        </div>
-        <div style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}>{row.status}</div>
-      </div>
-    </div>
-  ))
-) : (
-  <p>No recent activity found.</p>
-)}
+          history.map((item, i) => (
+            <article
+              key={i}
+              style={{
+                background: 'white',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                border: '1px solid #f3f4f6',
+              }}
+              aria-label={`${item.type || 'Soft Loan'} on ${new Date(item.date).toLocaleDateString()}`}
+            >
+              <div>
+                <p style={{ margin: 0, fontWeight: 600 }}>{item.type || 'Soft Loan'}</p>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#6B7280' }}>
+                  {new Date(item.date).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontWeight: 700,
+                  color: item.amount < 0 ? '#DC2626' : '#059669',
+                }}
+              >
+                {item.amount < 0 ? '-' : '+'} KES {Math.abs(item.amount).toLocaleString()}
+              </p>
+            </article>
+          ))
+        ) : (
+          <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>No recent activity found.</p>
+        )}
       </section>
     </div>
   );
