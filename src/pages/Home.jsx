@@ -58,16 +58,16 @@ const Home = () => {
 
 
         // --- ADD THE TABLE BANKING SUMMARY CALL HERE ---
-        try {
-            const bankingSummary = await getTableBankingSummary();
+        // try {
+        //    const bankingSummary = await getTableBankingSummary();
             // Assuming setStats is used elsewhere for general stats
-            setStats(prev => ({
-                ...prev,
-                balance: bankingSummary.balance || 0
-            }));
-        } catch (e) {
-            console.warn('Could not load table banking summary:', e);
-        }
+        //    setStats(prev => ({
+        //        ...prev,
+        //        balance: bankingSummary.balance || 0
+        //    }));
+        // } catch (e) {
+        //    console.warn('Could not load table banking summary:', e);
+        // }
 
         // Simulate other data loading
         setTimeout(() => {

@@ -12,7 +12,7 @@ const TableBanking = () => {
   const config = useContext(ConfigContext);
   const primaryColor = config?.theme?.colors?.primary || '#E31C23';
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState({ balance: 0, due_date: null });
   const [history, setHistory] = useState([]);
   const [isAdmin, setIsAdmin] = useState(user?.role === 'admin' || user?.role === 'treasurer');
@@ -28,19 +28,25 @@ const TableBanking = () => {
 
   // Fetch summary and history
   const loadBankingData = async () => {
-    try {
-      setLoading(true);
-      const data = await getTableBankingSummary();
-      setSummary(data);
-      const historyData = await getTableBankingHistory();
-      setHistory(historyData);
-    } catch (err) {
-      console.error('Error loading banking data:', err);
-      alert('Failed to load table banking info. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    
+    // Just call the function with the phone number
+    // The apiClient will fetch the orgId itself from its internal cache
+    const data = await getTableBankingSummary(user?.phone);
+    
+    setSummary(data);
+    const historyData = await getTableBankingHistory();
+    setHistory(historyData);
+  } catch (err) {
+    console.error('Error loading banking data:', err);
+    // Remove the alert for now so it doesn't annoy you during debugging
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   // Add another allocation input
   const handleAddAllocation = () => {

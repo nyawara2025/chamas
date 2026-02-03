@@ -1,67 +1,59 @@
 {
   "identity": {
     "orgId": 4,
-    "name": "NHC Women Group",
-    "shortName": "NHC Women Group",
-    "description": "Women Self Help for NHC Court Langata",
-    "logoUrl": "/logos/nhc.png",
-    "website": "https://nhclangata.org"
+    "name": "Great Women Initiative",
+    "description": "Women Empowerment & Support Network",
+    "logoUrl": "/logos/gwi-logo.png",
+    "faviconUrl": "/favicon.ico"
   },
   "theme": {
     "mode": "light",
     "colors": {
-      "primary": "#E31C23",
-      "secondary": "#1F2937",
-      "accent": "#059669",
-      "background": "#F3F4F6",
-      "surface": "#FFFFFF",
-      "text": "#1F2937",
-      "textLight": "#6B7280",
-      "success": "#10B981",
+      "primary": "#DB2777",
+      "secondary": "#EC4899",
+      "background": "#FDF2F8",
+      "text": "#4A4A4A",
+      "success": "#22C55E",
       "warning": "#F59E0B",
-      "error": "#EF4444",
-      "info": "#3B82F6"
+      "error": "#EF4444"
     },
-    "borderRadius": "rounded-lg",
-    "fontFamily": "Inter, system-ui, sans-serif"
+    "borderRadius": "rounded-lg"
   },
   "labels": {
     "entityName": "Member",
     "entityNamePlural": "Members",
-    "adminName": "Administrator",
-    "adminNamePlural": "Administrators",
-    "marketplaceName": "Sokoni",
-    "broadcastName": "Announcements",
-    "tablebankingName": "Tablebanking",
-    "complaintName": "Feedback",
+    "adminName": "Coordinator",
+    "adminNamePlural": "Coordinators",
+    "marketplaceName": "Showcase",
+    "broadcastName": "Updates",
+    "announcementName": "Events",
+    "complaintName": "Support Cases",
     "paymentName": "Contributions",
-    "welcomeMessage": "Welcome to NHC Women Chama",
-    "loginPrompt": "Enter your phone number to access the member portal",
-    "noDataMessage": "No records found",
+    "tablebankingName": "Tablebanking",
+    "welcomeMessage": "Welcome to",
+    "loginPrompt": "Enter your details to join",
+    "noDataMessage": "Nothing to show yet",
     "loadingMessage": "Loading...",
-    "homeLabel": "Home",
-    "broadcastsLabel": "Updates",
-    "announcementsLabel": "Notices",
-    "marketplaceLabel": "Sokoni",
-    "profileLabel": "My Profile",
-    "supportLabel": "Support"
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "memberIdLabel": "Membership Number",
+    "memberIdPlaceholder": "e.g., MBC-001"
   },
   "features": {
     "marketplace": true,
     "payments": true,
     "complaints": true,
     "broadcasts": true,
-    "tablebanking": true,
+    "announcements": true,
     "chat": true,
     "myInquiries": true,
     "vacantHouses": false,
     "shareOpinion": true,
-    "allowGuestAccess": false,
-    "groupManagement": false,
+    "tablebanking": true,
+    "allowGuestAccess": true,
+    "groupManagement": true,
     "events": true,
-    "directory": false,
-    "meetingNotes": true,
-    "finance": true
+    "directory": true
   },
   "modules": {
     "auth": {
@@ -69,80 +61,37 @@
       "requireApproval": true,
       "requireMemberId": true,
       "requireApartmentId": false,
-      "autoApprove": false,
-      "roles": ["member", "admin", "treasurer", "secretary"]
+      "roles": ["member", "mentee", "mentor", "coordinator", "admin"]
     },
     "marketplace": {
-      "name": "Sokoni",
-      "categories": ["Items", "Services", "Announcements"],
+      "name": "Member Showcase",
+      "categories": ["Products", "Services", "Opportunities", "Events"],
       "allowServices": true,
       "enableInquiries": true,
-      "enableResponses": true,
-      "requireAdminApproval": false
+      "enableResponses": true
     },
     "broadcasts": {
       "adminOnly": false,
       "allowReplies": true,
-      "maxMessageLength": 2000,
-      "categories": ["General", "Meeting", "Event", "Urgent"]
-    },
-    "announcements": {
-      "adminOnly": true,
-      "priorityLevels": ["Normal", "Important", "Urgent"],
-      "showExpiry": true
-    },
-    "payments": {
-      "name": "Contributions",
-      "categories": ["Monthly Kitty", "Special Appeal", "Table Banking"],
-      "allowOffline": true,
-      "receiptEnabled": true,
-      "anonymousAllowed": false,
-      "monthlyAmount": 500
-    },
-    "meetingNotes": {
-      "enabled": true,
-      "name": "Meeting Notes",
-      "categories": ["Minutes", "Agendas", "Constitution", "Reports", "Policies"],
-      "allowUpload": true,
-      "requireAdminApproval": true
-    },
-    "events": {
-      "enabled": true,
-      "name": "Events",
-      "categories": ["Meeting", "Social", "Fundraiser", "Workshop"],
-      "requireRegistration": false,
-      "maxAttendees": false
+      "maxMessageLength": 800
     },
     "support": {
-      "contactEmail": "info@nhcourtlangata.org",
+      "contactEmail": "support@greatwomen.org",
       "whatsappNumber": "+254700000000",
-      "officeHours": "Mon-Fri: 9AM-5PM"
+      "helplineNumber": "+254700000004"
     }
   },
   "api": {
     "webhookBaseUrl": "https://n8n.tenear.com/webhook",
     "headers": {
       "x-app-version": "1.0.0",
-      "org_id": 4
+      "x-org-id": 1
     }
   },
   "navigation": {
     "showBottomNav": true,
     "showHeader": true,
-    "menuOrder": ["home", "finance", "meetingNotes", "chat", "broadcasts", "marketplace", "events", "profile"],
-    "quickActions": ["pay", "meetingNotes", "chat"]
-  },
-  "branding": {
-    "tagline": "Supporting Each Other",
-    "verseOfTheDay": false,
-    "socialMedia": {
-      "website": "https://nhclangatacourt.org"
-    }
-  },
-  "localization": {
-    "timezone": "Africa/Nairobi",
-    "language": "en",
-    "dateFormat": "DD/MM/YYYY",
-    "currency": "KES"
+    "menuOrder": ["home", "announcements", "marketplace", "broadcasts", "profile"]
   }
 }
+

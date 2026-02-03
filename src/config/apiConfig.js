@@ -1,4 +1,4 @@
-// API Configuration for Care Kenya Welfare App
+// API Configuration for Chama App
 // Multi-tenant N8N Webhook Endpoints (using /welfare/ for all endpoints)
 // Organization ID is passed via x-org-id header for multi-tenant support
 
@@ -45,9 +45,9 @@ export const API_ENDPOINTS = {
   getProfile: 'https://n8n.tenear.com/webhook/welfare/profile',
 
 // Table Banking (Replaces Notices)
-  getTableBankingSummary: 'https://n8n.tenear.com/welfare/table-banking-summary',
-  postTableBankingLoan: 'https://n8n.tenear.com/welfare/table-banking-loan',
-  getTableBankingHistory: 'https://n8n.tenear.com/welfare/table-banking-history',
+  getTableBankingSummary: 'https://n8n.tenear.com/webhook/welfare/table-banking-summary',
+  postTableBankingLoan: 'https://n8n.tenear.com/webhook/welfare/table-banking-loan',
+  getTableBankingHistory: 'https://n8n.tenear.com/webhook/welfare/table-banking-history',
 };
 
 export default API_ENDPOINTS;

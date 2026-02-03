@@ -148,7 +148,7 @@ export const loginResident = async (phone, memberId) => {
     last_name: lastName,
     full_name: userResponse.full_name,
     email: userResponse.email,
-    phone: userResponse.phone_number || userResponse.phone,
+    phone: userResponse.phone,
     role: userResponse.role,
     org_id: userResponse.org_id,
     member_id: userResponse.member_id,
@@ -819,35 +819,20 @@ export const getVacantHouses = async () => {
 /**
  * Get personal table banking summary (Soft loan balance, due date, etc.)
  */
-export const getTableBankingSummary = async (phone) => {
-  const orgId = getOrgId();
-  const params = new URLSearchParams();
-  
-  // Log it so you can see it in your browser console
-  console.log('[apiClient] Fetching summary for:', phone);
+export const getTableBankingSummary = async () => {
+  const userId = getStoredUserId();
+  if (!userId) throw new Error('User not logged in');
 
-  params.append('phone_number', phone || '');
-  if (orgId) params.append('org_id', orgId);
-
-  const response = await fetch(API_ENDPOINTS.getTableBankingSummary, {
+  const response = await apiRequest(API_ENDPOINTS.getTableBankingSummary, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
+    body: JSON.stringify({ 
+      user_id: parseInt(userId) 
+    }),
   });
 
-  // Check if response is empty before parsing
-  const text = await response.text();
-  if (!text) return { balance: 0, due_date: null, history: [] };
-
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse n8n JSON:', text);
-    return { balance: 0, due_date: null, history: [] };
-  }
+  // Expected structure: { balance: 500, due_date: '2026-03-01', history: [] }
+  return response || { balance: 0, history: [] };
 };
-
-
 
 /**
  * Log a meeting session (Treasurer Only)
